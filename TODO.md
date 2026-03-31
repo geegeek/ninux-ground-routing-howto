@@ -52,20 +52,20 @@ Legenda priorità:
 - [ ] 🟡 Sottosezione Adhoc/Client Mode: trelay è ancora lo strumento corretto? Verificare alternative
 
 ## Sezione 9: Ground Router — OpenWRT (LuCI)
-- [ ] 🔴 **CAMBIAMENTO CRITICO: swconfig → DSA** (Distributed Switch Architecture) da OpenWrt 21.02+
+- [x] 🔴 **CAMBIAMENTO CRITICO: swconfig → DSA** (Distributed Switch Architecture) da OpenWrt 21.02+
   - L'intera logica di configurazione switch/VLAN in LuCI è cambiata
   - Non esiste più la pagina "Network > Switch"
   - Le VLAN si configurano tramite bridge VLAN filtering in "Network > Interfaces"
   - Il concetto di "porta logica vs fisica" è gestito diversamente
-- [ ] 🔴 **Tabella hardware completamente obsoleta** — tutti i dispositivi elencati sono fuori produzione o con specifiche inadeguate
+- [x] 🔴 **Tabella hardware completamente obsoleta** — tutti i dispositivi elencati sono fuori produzione o con specifiche inadeguate
   - Creare nuova tabella con dispositivi 2024-2026 (es. GL.iNet GL-MT6000, TP-Link Archer C6v4, Xiaomi AX3000T, BananaPi BPI-R3/R4)
   - Verificare supporto DSA e assenza bug VLAN per ciascuno
-- [ ] 🔴 Sezione "Cosa c'è da sapere sugli switch" va riscritta per DSA
-- [ ] 🟡 Sezione "Precauzioni" (backdoor WAN): concetto valido, aggiornare procedura per DSA
-- [ ] 🟡 Sezione "Creazione VLAN": riscrivere completamente per interfaccia LuCI con DSA
-- [ ] 🟡 Sezione "Creazione Network OpenWRT": verificare se la procedura è sostanzialmente invariata con DSA
-- [ ] 🟡 Sezione "Routing: OLSR": pacchetti olsrd sono ancora nei feed OpenWrt? Verificare
-- [ ] 🟡 Sezione "Firewalling": fw3 → fw4 (nftables) da OpenWrt 22.03+
+- [x] 🔴 Sezione "Cosa c'è da sapere sugli switch" va riscritta per DSA
+- [x] 🟡 Sezione "Precauzioni" (backdoor WAN): concetto valido, aggiornare procedura per DSA
+- [x] 🟡 Sezione "Creazione VLAN": riscrivere completamente per interfaccia LuCI con DSA
+- [x] 🟡 Sezione "Creazione Network OpenWRT": verificare se la procedura è sostanzialmente invariata con DSA
+- [x] 🟡 Sezione "Routing: OLSR": pacchetti olsrd sono ancora nei feed OpenWrt? Verificare
+- [x] 🟡 Sezione "Firewalling": fw3 → fw4 (nftables) da OpenWrt 22.03+
 - [ ] 🆕 Sezione "Routing: Batman" — ancora `TODO`, scrivere almeno una guida base
 
 ## Sezione 10: Ground Router — OpenWRT (CLI/UCI)

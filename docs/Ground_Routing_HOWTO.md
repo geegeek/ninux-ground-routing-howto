@@ -16,11 +16,10 @@
 [Adhoc/Client Mode](#adhoc/client-mode)  
 [Configurazione Ground Router](#configurazione-ground-router)  
 [OpenWRT (LuCI)](#openwrt-\(luci\))  
-[Cosa c’è da sapere sugli switch in OpenWRT](#cosa-c’è-da-sapere-sugli-switch-in-openwrt)  
-[Router OpenWRT-compatibili: Dispositivi consigliati](#router-openwrt-compatibili:-dispositivi-consigliati)  
-[Preparazione](#preparazione)  
-[Analisi dello switch: presenza delle VLAN di default](#analisi-dello-switch:-presenza-delle-vlan-di-default)  
-[Analisi dello switch: numerazione fisica vs numerazione logica](#analisi-dello-switch:-numerazione-fisica-vs-numerazione-logica)  
+[Cosa c’è da sapere sulle interfacce di rete in OpenWrt (DSA)](#cosa-c’è-da-sapere-sulle-interfacce-di-rete-in-openwrt-(dsa))
+[Router OpenWrt-compatibili: Dispositivi consigliati](#router-openwrt-compatibili:-dispositivi-consigliati)
+[Preparazione](#preparazione)
+[Analisi delle interfacce di rete](#analisi-delle-interfacce-di-rete)
 [Precauzioni](#precauzioni)  
 [Creazione delle VLAN](#creazione-delle-vlan)  
 [Creazione e configurazione delle Network OpenWRT](#creazione-e-configurazione-delle-network-openwrt)  
@@ -303,43 +302,41 @@ Così facendo avremo creato l’equivalente di un bridge  e potremo trattare  il
 
 Ok, avete flashato OpenWRT fresco fresco sul vostro router a terra e vi siete loggati nell’interfaccia web LuCI (192.168.1.1). Configurarlo attraverso l’interfaccia grafica nel proprio browser è certamente più semplice per chi ha appena iniziato in Ninux, ma richiede delle particolari attenzioni che saranno discusse nel corso di questa sezione.
 
-### **Cosa c’è da sapere sugli switch in OpenWRT** {#cosa-c’è-da-sapere-sugli-switch-in-openwrt}
+### **Cosa c’è da sapere sulle interfacce di rete in OpenWrt (DSA)** {#cosa-c’è-da-sapere-sulle-interfacce-di-rete-in-openwrt-(dsa)}
 
-Nella tipica parte posteriore del tipico router OpenWRT troveremo **4 porte RJ45 numerate (1-4)**, solitamente di colore giallo, e **una singola porta RJ45 di colore blu etichettata come WAN o Internet**. Le prime porte sono quelle che il produttore ha destinato ad essere utilizzate per collegare i singoli PC in un’unica rete locale, mentre la porta blu è utilizzata per collegare la rete locale ad altre reti (Internet, solitamente, attraverso un modem ADSL).  
-Ora, due casi possono verificarsi all’interno del router:
+Nella tipica parte posteriore del tipico router OpenWrt troveremo **4 porte RJ45 numerate (1-4)**, solitamente di colore giallo, e **una singola porta RJ45 di colore blu etichettata come WAN o Internet**. Le prime porte sono quelle che il produttore ha destinato ad essere utilizzate per collegare i singoli PC in un’unica rete locale, mentre la porta blu è utilizzata per collegare la rete locale ad altre reti (Internet, solitamente, attraverso un modem o un ONT in fibra).
 
-* Le 4 porte numerate fanno parte di un unico switch, e la porta blu appartiene ad una diversa interfaccia completamente separata dallo switch. Queste due interfacce appena discusse sono note al router come eth0 e eth1.  
-* Tutte e 5 le porte fanno parte di un’unico switch. In questo caso il router, già con le impostazioni di fabbrica, usa due VLAN preconfigurate (solitamente con VLAN ID 1 e 2\) per separare le 5 porte nel solito “4+1”. Se questo è il caso, il router chiamerà queste due interfacce eth0.1 e eth0.2.
+A partire da OpenWrt 21.02, la gestione dello switch interno è stata completamente riscritta con l’introduzione di **DSA (Distributed Switch Architecture)**. Con DSA, ogni porta fisica del router appare direttamente come un’**interfaccia di rete Linux indipendente**, con nomi come **lan1**, **lan2**, **lan3**, **lan4** e **wan**. Non esiste più la vecchia pagina “Network > Switch” di LuCI, e non c’è più bisogno di ragionare in termini di “porta logica vs porta fisica” o di “CPU port”: ogni porta è già visibile al sistema operativo come interfaccia propria.
 
-In generale Linux (sul quale OpenWRT è basato) associa ad ogni VLAN una interfaccia virtuale e la denomina nella forma **ethX.Y**, dove **X** è il numero dell’interfaccia fisica (uno switch, una scheda di rete, ecc.) e **Y** è il VLAN ID (cioè il tag) della VLAN in questione.
+Le VLAN vengono gestite attraverso il meccanismo di **bridge VLAN filtering**: il bridge di default (tipicamente **br-lan**, che raggruppa lan1-lan4) può essere configurato per filtrare il traffico in base ai tag VLAN, e per ciascuna VLAN si crea un **dispositivo bridge VLAN** (ad esempio **br-lan.3**, **br-lan.7**) al quale associare poi un’interfaccia di rete OpenWrt.
 
-Qualsiasi sia il numero di porte RJ45 che faccia parte dello switch, di esso farà sempre parte una porta aggiuntiva speciale che è la **porta CPU**. Questa porta, a differenza delle altre, non presenta un connettore fisico RJ45 accessibile all’esterno ma è invece “saldata” sulla scheda madre del router. Senza entrare troppo nel dettaglio, questa porta “vede” i pacchetti di tutte le altre e svolge la fondamentale funzione di renderli disponibili al sistema operativo OpenWRT per l’elaborazione (routing, firewall, shaping, ecc).
+In pratica la logica non cambia rispetto a quanto spiegato nella sezione teorica sulle VLAN: ogni porta può far parte di più VLAN, il traffico può essere tagged o untagged, e le VLAN rimangono isolate tra loro fino a quando una decisione di routing non le mette in comunicazione. Quello che cambia è solo *dove* e *come* si configurano queste cose in LuCI.
 
-La necessità di operare con le VLAN rende fastidioso ogni bug che le riguardi. In particolare, tantissimi dei router OpenWRT-compatibili di nostro interesse soffrono di un **bug che rende impossibile fare uscire da una stessa porta sia traffico tagged che untagged** (su due VLAN diverse, ovviamente): se ci si prova si può osservare che quella porta smette totalmente di comunicare oppure continua a far uscire sempre e solo traffico tagged anche nella VLAN dove lo si vuole untagged.  
-Per quanto fastidioso, questo bug non è particolarmente bloccante: per aggirarlo basta utilizzare la doppia VLAN sull’antenna che abbiamo visto nella sezione “Configurazione Radio”, invece della singola che sarebbe stata necessaria se il nostro router non avesse questo bug; dal punto di vista del ground router invece, questo bug significa semplicemente che ci saranno delle porte (una per ogni antenna) dello switch in meno disponibili per far passare traffico “legacy” (comprensibile dai dispositivi che non supportano le VLAN).
+> **Nota storica (swconfig / OpenWrt ≤ 19.07)**
+>
+> Nelle versioni di OpenWrt precedenti alla 21.02, lo switch interno era gestito da un sottosistema chiamato **swconfig**. Le porte del router non erano visibili come interfacce separate, ma facevano tutte capo ad un unico dispositivo (ad esempio `eth0`), e le VLAN si configuravano nella pagina **Network > Switch** di LuCI, operando su una tabella con porte numerate (la cui numerazione logica spesso non corrispondeva alle etichette fisiche sul router) e una speciale “CPU Port”. Molti router soffrivano inoltre di un bug che impediva di far uscire da una stessa porta traffico sia tagged che untagged. Con DSA tutti questi problemi sono superati: le porte sono interfacce indipendenti con nomi stabili, e la gestione VLAN è unificata nel framework standard di Linux.
 
-### **Router OpenWRT-compatibili: Dispositivi consigliati** {#router-openwrt-compatibili:-dispositivi-consigliati}
+### **Router OpenWrt-compatibili: Dispositivi consigliati** {#router-openwrt-compatibili:-dispositivi-consigliati}
 
-| Marca | Modello | Gigabit | RAM | Flash | Bug VLAN | Easy Install | Uso | Prezzo | Note |
-| ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
-| TP-Link | TL-WR740N/ND v4.xTL-WR741ND | NO | 32 MB | 4 MB | SI | SI | Foglia | 20 € |  |
-| TP-Link | TL-WR841NTL-WR841ND v8.x | NO | 32 MB | 4 MB | SI | SI | Foglia | 20 € |  |
-| TP-Link | TL-WR841N v9.x | NO | 32 MB ? | 4 MB | ? | SI | Foglia | 18 € | BB |
-| TP-Link | TL-WR1043ND v1 | SI | 32 MB | 8 MB | NO | SI | Foglia | 40 € | Fuori Produzione |
-| TP-Link | TL-WR1043ND v2 | SI | 64 MB | 8 MB | ? | ? | SuperNodo | 40 € | BB |
-| TP-Link | TL-WR2543ND | SI | 64 MB | 8 MB | ? | SI | SuperNodo | 60 € |  |
-| TP-Link | TL-WDR3600 | SI | 128 MB | 8 MB | SI | ? | SuperNodo | 45 € |  |
-| TP-Link | TL-WDR4300 | SI | 128 MB | 8 MB | [NO](https://dev.openwrt.org/changeset/40777) | ? | SuperNodo | 50 € |  |
-| TP-Link | [TL-WDR4900](http://wiki.openwrt.org/toh/tp-link/tl-wdr4900) | SI | 128 MB | 16 MB | ? | SI | SuperNodo | 80 € | BB |
-| Asus | RT-N16 | SI | 128 MB | 32 MB | ? | ? | SuperNodo | 75 € | BB |
-| D-Link | DIR-825 (B1/B2) | SI | 64 MB | 8 MB | ? | ? | SuperNodo | ? € | AA-TOut of Stock |
-| D-Link | DIR-825 (C1) | SI | 128 MB | 16 MB | ? | ? | SuperNodo | ? € | BBOut of Stock |
-| LinkSys | WRT160NL | SI | 32 MB | 8 MB | ? | SI | Foglia | 65 € |  |
+Con il passaggio a DSA, è fondamentale scegliere dispositivi con **supporto DSA completo** e verificato. Le specifiche minime consigliate nel 2026 sono:
 
-Allo stato attuale, tra i dispositivi OpenWRT compatibili, le scelte consigliabili sono:
+* switch **gigabit** (ormai indispensabile)
+* almeno **128 MB di RAM** (256 MB consigliati per supernodi)
+* almeno **16 MB di flash** (128 MB consigliati per installare comodamente tutti i pacchetti)
+* supporto **OpenWrt 23.05** o successivo con DSA
 
-* TP-Link TL-WR1043ND v2.x, per i nodi foglia.  
-* TP-Link TL-WDR4300, per i SuperNodi.
+| Marca | Modello | Porte GbE | RAM | Flash | DSA | Uso | Prezzo indicativo | Note |
+| ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
+| GL.iNet | GL-MT6000 (Flint 2) | 5 × 1G + 1 × 2.5G | 1 GB | 128 MB | SI | SuperNodo | ~100 € | MediaTek MT7986, ottimo supporto OpenWrt |
+| Xiaomi | AX3000T | 4 × 1G | 256 MB | 128 MB | SI | SuperNodo | ~30 € | MediaTek MT7981, ottimo rapporto qualità/prezzo |
+| TP-Link | Archer C6 v4 | 5 × 1G | 64 MB | 16 MB | SI | Foglia | ~30 € | MediaTek MT7621, collaudato |
+| BananaPi | BPI-R3 | 5 × 1G + 1 × 2.5G SFP | 2 GB | microSD/eMMC | SI | SuperNodo | ~90 € | Board aperta, ideale per sperimentazione |
+| BananaPi | BPI-R4 | 4 × 2.5G SFP | 4 GB | microSD/eMMC | SI | SuperNodo | ~120 € | Top di gamma, MediaTek MT7988 |
+| TP-Link | TL-XDR6086 (Q6) | 5 × 2.5G | 512 MB | 128 MB | SI | SuperNodo | ~60 € | Qualcomm IPQ5018 |
+
+Prima di acquistare un dispositivo, **verificatene sempre lo stato di supporto** nella [Table of Hardware di OpenWrt](https://openwrt.org/toh/start) e controllate che il supporto DSA sia confermato e privo di bug noti per le VLAN.
+
+> **Nota storica**: i dispositivi consigliati nella versione precedente di questa guida (TP-Link TL-WR1043ND, TL-WDR4300, ecc.) sono ormai fuori produzione e non soddisfano più le specifiche minime raccomandate. Molti di essi non supportano DSA e restano fermi a OpenWrt con swconfig.
 
 ### **Preparazione** {#preparazione}
 
@@ -352,85 +349,76 @@ Se non è già collegato, colleghiamo il router a terra alla porta ethernet del 
 
 Ora il router sarà accessibile via browser all’indirizzo 192.168.1.1. Prendetevi il tempo per impostare una password, cosa che farà scomparire il continuo promemoria di OpenWRT.
 
-### **Analisi dello switch: presenza delle VLAN di default** {#analisi-dello-switch:-presenza-delle-vlan-di-default}
+### **Analisi delle interfacce di rete** {#analisi-delle-interfacce-di-rete}
 
-Altro passaggio facile: basta recarsi in **Network \> Interfaces**.   
-Se l’interfaccia associata alla Network OpenWRT “WAN” è nella forma ethX, significa che la porta blu del router è un’interfaccia a parte rispetto allo switch, sul quale sarà presente un’unica VLAN.
+Con DSA, la situazione è molto più semplice rispetto al passato. Andate in **Network > Interfaces** e osservate i dispositivi (devices) disponibili: vedrete direttamente le interfacce **lan1**, **lan2**, **lan3**, **lan4** e **wan**, ciascuna corrispondente a una porta fisica del router. Non c'è più bisogno di scoprire la corrispondenza tra numerazione logica e fisica, perché le interfacce hanno nomi stabili che riflettono direttamente le porte.
 
-![openwrt\_defaultvlan\_single.png][image12]
+Il bridge di default **br-lan** raggruppa tutte le porte LAN (lan1-lan4). La porta WAN è un'interfaccia a sé stante.
 
-Se invece alla Network OpenWRT “WAN” è associata un’interfaccia ethX.Y, significa che lo switch nel router include tutte le sue porte e le separa per mezzo di 2 VLAN pre-configurate.  
-**Network \> Switch** dovrebbe confermare la situazione sopra descritta.
-
-![openwrt\_defaultvlan\_switch.png][image13]
-
-### **Analisi dello switch: numerazione fisica vs numerazione logica** {#analisi-dello-switch:-numerazione-fisica-vs-numerazione-logica}
-
-Assicuratevi che il cavo ethernet nel router a terra sia collegato alla porta dello switch etichettata col numero **1 (uno)**. Non preoccupatevi di perdere il collegamento col router: se avete disattivato NetworkManager il router manterrà gli indirizzi anche dopo aver scollegato e ricollegato il cavo. Fatto questo posizionatevi nella schermata **Network \> Switch**.  
-Le icone, e le diciture “no link” e “full duplex”, indicano chiaramente se in una porta dello switch è presente o meno un collegamento. Per il momento ignorate la “CPU Port”, che ovviamente risulterà sempre collegata.  
-Sopra le icone è riportato il numero della porta **logica** dello switch. **Quasi sempre questo numero non corrisponde all’etichetta riportata fiscamente sul router**. Appuntatevi su un foglio di carta la corrispondenza tra etichetta fisica e porta logica.  
-Ora scollegate il cavo dalla porta etichettata 1 (uno) e collegatelo alla porta etichettata 2 (due) sul router. Senza neanche bisogno di aggiornare la pagina, entro qualche secondo noterete che la porta precedente cambierà icona e dicitura in “no link”, mente un’altra porta segnalerà “full duplex” e l’icona di collegamento avvenuto. Appuntate questa nuova corrispondenza.  
-Continuate allo stesso modo per le porte etichettate **3 (tre)** e **4 (quattro)**. Alla fine i vostri appunti riporteranno una situazione del genere.
-
-| Porta con etichetta... | Porta logica... |
-| :---: | :---: |
-| 1 | 2 |
-| 2 | 3 |
-| 3 | 4 |
-| 4 | 1 |
-
-Nel resto di questo HowTo, quando parleremo di “porta X” intenderemo sempre e solo la **numerazione logica su OpenWRT**. Starà a voi associare a questa la numerazione fisica sul router e collegare i cavi nella porta esatta.
+> **Nota storica (swconfig / OpenWrt ≤ 19.07)**
+>
+> Con il vecchio swconfig, era necessario andare in "Network > Switch" per verificare quante VLAN di default fossero presenti e quale fosse la corrispondenza tra numerazione logica e fisica delle porte (che quasi mai coincideva con le etichette stampate sul router). Questo passaggio non è più necessario con DSA.
 
 ### **Precauzioni** {#precauzioni}
 
-Operare sugli switch in OpenWRT è un’operazione delicata, ed essere sbattuti fuori dal pannello di configurazione perché la configurazione non è stata applicata o è stata applicata male è questione di un attimo. In questo sfortunato caso saremmo costretti a resettare il router e ricominciare da capo.  
-Tanto vale farsi furbi e lasciarsi una “porta sul retro” in caso di disastro, che consenta di accedere al router anche in caso di bizze allo switch. Nel nostro caso questa porta sul retro sarà quella blu del router, la WAN.
+Operare sulla configurazione di rete in OpenWrt è un'operazione delicata, ed essere sbattuti fuori dal pannello di configurazione perché la configurazione non è stata applicata male è questione di un attimo. In questo sfortunato caso saremmo costretti a resettare il router e ricominciare da capo.
+Tanto vale farsi furbi e lasciarsi una "porta sul retro" in caso di disastro, che consenta di accedere al router anche in caso di problemi. Nel nostro caso questa porta sul retro sarà quella blu del router, la WAN.
 
-Andate in **Network \> Interfaces** e cliccate su **Edit** nella Network di OpenWRT **WAN**.  
-Selezionate **Protocol:Static address** e confermate cliccando su **Switch protocol**.  
-Compilate il campo **IPv4 Address** con 192.168.254.1.  
-Selezionate **Netmask**:255.255.255.0  
-**Save & Apply** e attendete qualche secondo.  
-Andate in **Network \> Firewall \> General Settings**. Nella riga “WAN \=\> Reject” variate **Input** da reject a **accept**.  
+Andate in **Network > Interfaces** e cliccate su **Edit** nella Network di OpenWrt **WAN**.
+Selezionate **Protocol: Static address** e confermate cliccando su **Switch protocol**.
+Compilate il campo **IPv4 Address** con 192.168.254.1.
+Selezionate **Netmask**: 255.255.255.0
+**Save & Apply** e attendete qualche secondo.
+Andate in **Network > Firewall > General Settings**. Nella riga "WAN => Reject" variate **Input** da reject a **accept**.
 **Save & Apply** e attendete che i messaggi di applicazione in corso scompaiano.
 
 Da questo momento **il router sarà accessibile anche sulla porta WAN**, ovviamente dopo aver impostato sul proprio PC un indirizzo della rete corrispondente, ad esempio 192.168.254.2.
 
 ### **Creazione delle VLAN** {#creazione-delle-vlan}
 
-Andate in **Network \> Switch**.  
-Nella VLAN di default che contiene 4 porte numerate untagged (solitamente è quella con VLAN ID 1), **cambiate tutte queste porte in tagged** (compresa la CPU Port).  
-Create le VLAN a voi necessarie cliccando su **Add** e compilando i campi della nuova riga che comparirà, seguendo attentamente queste regole:
+Con DSA, le VLAN si configurano attraverso il **bridge VLAN filtering** nella sezione **Network > Interfaces**, tab **Devices**. Ecco i passaggi:
 
-* Qualsiasi VLAN create, assicuratevi che la **CPU Port** sia sempre **tagged**.  
-* Per **ciascuna** antenna, create una VLAN che abbia  
-  * VLAN ID pari a quello della “VLAN di traffico wifi” impostato durante la configurazione dell’antenna in questione.  
-  * la porta alla quale si collegherà l’antenna impostata come **tagged**.  
-  * tutte le altre porte numerate impostate ad **off**.  
-* Infine create **una** VLAN che abbia  
-  * VLAN ID pari a quello della “VLAN di gestione” impostato in comune su tutte le antenne durante la loro configurazione.  
-  * le porte alle quali si collegheranno le antenne impostate come **tagged**.  
-  * le porte lasciate libere dalle antenne e disponibili per altri dispositivi, impostate come **untagged**.
+**Passo 1: Abilitare il VLAN filtering sul bridge**
 
-**Esempio pratico**: due antenne configurate come nella sezione dedicata a AirOS, con “VLAN di traffico” rispettivamente aventi ID 3 e 4 e “VLAN di gestione” comune con ID 7\. La prima antenna sarà collegata alla porta 3 dello switch, la seconda nella porta 4\. Questa la situazione corrispondente, applicando le regole appena enunciate.
+Andate in **Network > Interfaces**, tab **Devices**. Trovate il dispositivo **br-lan** e cliccate su **Configure**. Nella sezione **Bridge VLAN filtering**, spuntate **Enable VLAN filtering**. Apparirà una nuova sezione dove potremo definire le nostre VLAN.
 
-![openwrt\_switch\_final.png][image14]
+**Passo 2: Configurare le VLAN sulle porte**
 
-Cliccate su **Save**.  
-Ora rimuovete la VLAN di default, quella che abbiamo variato all’inizio da “tutto untagged” a “tutto tagged”, cliccando sul corrispondente **Delete** e infine facciamo **Save** per ritrovarci con questa situazione finale.
+Per ciascuna delle VLAN di cui abbiamo bisogno, clicchiamo **Add** e compiliamo i campi seguendo queste regole:
 
-![gr\_howto\_missing\_screen.png][image15]
+* Per **ciascuna** antenna, create una VLAN che abbia:
+  * **VLAN ID** pari a quello della "VLAN di traffico wifi" impostato durante la configurazione dell'antenna in questione.
+  * la porta alla quale si collegherà l'antenna impostata come **tagged** (con la "t").
+  * tutte le altre porte LAN impostate ad **off** (nessuna spunta).
+* Infine create **una** VLAN che abbia:
+  * **VLAN ID** pari a quello della "VLAN di gestione" impostato in comune su tutte le antenne durante la loro configurazione.
+  * le porte alle quali si collegheranno le antenne impostate come **tagged**.
+  * le porte lasciate libere dalle antenne e disponibili per altri dispositivi, impostate come **untagged** (con la "u") e come **PVID** (Primary VLAN ID).
 
-Ora andate su **Network \> Interfaces**.   
-Cliccate **Edit** sulla Network **LAN,** e poi recatevi nel tab **Physical Settings**.  
-Togliete la spunta da “Ethernet Adapter” e spuntate **VLAN Interface:ethX.7**.  
+**Esempio pratico**: due antenne configurate come nella sezione dedicata a AirOS, con "VLAN di traffico" rispettivamente aventi ID 3 e 4 e "VLAN di gestione" comune con ID 7. La prima antenna sarà collegata alla porta lan3, la seconda alla porta lan4. Questa la configurazione corrispondente:
+
+| VLAN ID | lan1 | lan2 | lan3 | lan4 |
+| :---: | :---: | :---: | :---: | :---: |
+| 3 | off | off | tagged | off |
+| 4 | off | off | off | tagged |
+| 7 | untagged (PVID) | untagged (PVID) | tagged | tagged |
+
+Cliccate su **Save**.
+
+**Passo 3: Creare i dispositivi VLAN**
+
+Sempre nel tab **Devices**, cliccate su **Add device configuration**. Selezionate **Type: VLAN (802.1Q)**, come **Existing device** scegliete **br-lan**, e nel campo **VLAN ID** inserite il primo VLAN ID (ad es. 3). Ripetete per ogni VLAN ID necessario (4, 7, ecc.).
+Questo creerà i dispositivi **br-lan.3**, **br-lan.4**, **br-lan.7** che potremo poi associare alle interfacce di rete.
+
+**Passo 4: Assegnare il bridge VLAN alla rete LAN**
+
+Andate in **Network > Interfaces**, cliccate **Edit** sulla Network **LAN**. Nella sezione **Device**, selezionate **br-lan.7** (il dispositivo VLAN corrispondente alla VLAN di gestione).
 Cliccate su **Save** e poi su **Save & Apply**.
 
-È interamente possibile che il router adesso abbia smesso di rispondervi. Non preoccupatevi (ancora), è normale. **Moltissimi switch richiedono un riavvio** per applicare correttamente le modifiche alle VLAN. **Spegnete e riaccendete il router**.  
-Assicuratevi che il cavo sia connesso ad una delle porte **non** destinate alle antenne (quelle untagged per intenderci) e dovreste di nuovo poter accedere all’interfaccia di LuCI.  
-Qualora abbiate 4 antenne e tutto le porte siano quindi state contrassegnate come tagged, per riguadagnare l’accesso al router bisognerà configurare la VLAN ID 7 sul proprio PC come mostrato al termine della sezione dedicata a AirOS; in alternativa potete usare la WAN-backdoor che abbiamo creato in precedenza.
+Assicuratevi che il cavo sia connesso ad una delle porte configurate come untagged sulla VLAN 7 (nel nostro esempio lan1 o lan2) e dovreste poter accedere normalmente all'interfaccia di LuCI.
+Qualora tutte le porte siano state contrassegnate come tagged, per riguadagnare l'accesso al router bisognerà configurare la VLAN ID 7 sul proprio PC come mostrato al termine della sezione dedicata a AirOS; in alternativa potete usare la WAN-backdoor che abbiamo creato in precedenza.
 
-**In caso di problemi**: se proprio lo switch non vi consente più il collegamento, potete sfruttare la backdoor WAN per accedere a LuCI e resettare il router alle impostazioni di fabbrica e ricominciare da capo. 
+**In caso di problemi**: se la configurazione VLAN non funziona, potete sfruttare la backdoor WAN per accedere a LuCI e resettare il router alle impostazioni di fabbrica.
 
 ### **Creazione e configurazione delle Network OpenWRT** {#creazione-e-configurazione-delle-network-openwrt}
 
@@ -445,15 +433,14 @@ Per configurare la vostra rete locale con indirizzamento Ninux, impostate:
 * **Use Custom DNS Server: il nostro server DNS preferito**. Se vogliamo poter risolvere eventuali domini interni di Ninux, come \*.nnx, dobbiamo inserire un DNS interno a Ninux.  
 * Potete ignorare tutti gli altri settaggi, a meno che non desideriate qualche personalizzazione particolare (ad esempio un particolare range DHCP).
 
-È il momento di configurare la Network di OpenWRT relativa alla nostra antenna.  
-Tornate in **Network \> Interface**.  
-Cliccate su **Add new Interface**.  
-In questa prima schermate, configurate con:
+È il momento di configurare la Network di OpenWrt relativa alla nostra antenna.
+Tornate in **Network > Interfaces**.
+Cliccate su **Add new Interface**.
+In questa prima schermata, configurate con:
 
-* **Name of the new interface: il nome che preferite**, possibilmente breve e descrittivo del link effettuato, per esempio Antenna1 o M5CasamiaCasazio.  
-* **Protocol of the new interface: Static address**.  
-* **Create a bridge over multiple interfaces**: senza spunta  
-* **Cover the following interface: VLAN Interface ethX.Y**, dove Y è il VLAN ID della “VLAN di traffico wireless” nell’antenna che stiamo configurando.  
+* **Name of the new interface: il nome che preferite**, possibilmente breve e descrittivo del link effettuato, per esempio Antenna1 o M5CasamiaCasazio.
+* **Protocol of the new interface: Static address**.
+* **Device: br-lan.Y**, dove Y è il VLAN ID della “VLAN di traffico wireless” nell’antenna che stiamo configurando (ad esempio br-lan.3).
 * Cliccate **Submit**.
 
 Nella nuova schermata che comparirà, configuriamo gli indirizzi della “VLAN di traffico wireless”:
@@ -474,20 +461,18 @@ La situazione finale assomiglierà a questa:
 
 ### **Routing: OLSR** {#routing:-olsr}
 
-Questa sezione della guida assume che la nostra build di OpenWRT (ad esempio, Scooreggione) abbia il **demone OLSR già incluso**.   
-Se non è così e abbiamo disponibilità di un collegamento ad Internet che il nostro router gestirà, ad esempio attraverso attraverso un modem ADSL, adesso è un buon momento per **impostare la nostra connessione ad Internet e attivare il wifi** del router. Non essendo specifiche del routing a terra questa guida non tratterà questi due step, che sono comunque estremamente semplici da realizzare nelle sezioni di LuCI **Network \> Interfaces \> WAN** e **Network \> Wifi \> Edit**.  
-Una volta fatto possiamo recarci in **System \> Software** e aggiornare l’elenco dei pacchetti.  
-Cerchiamo “**olsr**” nell’apposito campo di ricerca **“Find Package”** e passiamo alla **tab “Available Packages”**.  
+Questa sezione della guida assume che il demone **OLSR non sia ancora installato** sul router. Se abbiamo disponibilità di un collegamento ad Internet che il nostro router gestirà, ad esempio attraverso un modem o un ONT in fibra, adesso è un buon momento per **impostare la nostra connessione ad Internet e attivare il wifi** del router. Non essendo specifiche del routing a terra questa guida non tratterà questi due step, che sono comunque estremamente semplici da realizzare nelle sezioni di LuCI **Network > Interfaces > WAN** e **Network > Wireless**.
+Una volta fatto possiamo recarci in **System > Software** e aggiornare l’elenco dei pacchetti.
+Cerchiamo “**olsr**” nell’apposito campo di ricerca **”Find Package”** e passiamo alla **tab “Available Packages”**.
 Per installare un pacchetto clicchiamo su **Install e confermiamo**. Ripetiamo la ricerca fino ad installare i seguenti pacchetti:
 
-* olsrd  
-* olsrd-mod-txtinfo  
-* olsrd-mod-nameservice  
-* olsrd-mod-arprefresh  
+* olsrd
+* olsrd-mod-txtinfo
+* olsrd-mod-nameservice
+* olsrd-mod-arprefresh
 * luci-app-olsr
 
-Utilizzando OpenWRT 14.07 Barrier Breaker é necessario anche il pacchetto **luci-lib-json** per il corretto funzionamento dell’interfaccia grafica di OLSR (Status \> OLSR).  
-Una volta installati i pacchetti, spostarsi su **Services \> OLSR IPv4**. menu **Plugins** ed assicurarsi che siano tutti **Enabled** (il plugin olsrd\_jsoninfo.so.0.0 é di default disabilitato). Se non lo sono, abilitarli e cliccare **Save\&Apply**.
+Una volta installati i pacchetti, spostarsi su **Services > OLSR IPv4**, menu **Plugins** ed assicurarsi che siano tutti **Enabled** (il plugin olsrd\_jsoninfo.so.0.0 è di default disabilitato). Se non lo sono, abilitarli e cliccare **Save & Apply**.
 
 Andiamo nella nuova sezione di LuCI che gestirà le opzioni del protocollo OLSR: **Service \> OLSR**.  
 Nella sezione **“Interfaces”** in basso, alla **riga già esistente**, clicchiamo su **Edit**.  
@@ -514,6 +499,8 @@ Clicchiamo su Add e compiliamo i campi
 TODO
 
 ### **Firewalling** {#firewalling}
+
+> **Nota**: a partire da OpenWrt 22.03, il firewall è gestito da **fw4** basato su **nftables**, che sostituisce il precedente fw3 basato su iptables. L'interfaccia LuCI resta sostanzialmente invariata, quindi i passaggi qui descritti sono validi sia per fw3 che per fw4.
 
 Si tratta di configurare le regole di Firewall per **consentire il transito del traffico Ninux**, sia quello diretto da/verso la nostra rete (Input e Output) sia quello diretto verso gli altri nodi Ninux e che transiterà per il nostro SuperNodo (Forward).
 
