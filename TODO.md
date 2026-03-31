@@ -26,8 +26,8 @@ Legenda priorità:
 - [ ] 🟢 Aggiornare/sostituire l'immagine di architettura (attualmente vuota/rotta)
 
 ## Sezione 5: Requisiti
-- [ ] 🔴 **`vconfig` è deprecato** — sostituire con `ip link add ... type vlan id ...` (iproute2)
-- [ ] 🔴 **`ifconfig` è deprecato** — sostituire con `ip addr` / `ip link` in tutta la guida
+- [x] 🔴 **`vconfig` è deprecato** — sostituire con `ip link add ... type vlan id ...` (iproute2)
+- [x] 🔴 **`ifconfig` è deprecato** — sostituire con `ip addr` / `ip link` in tutta la guida
 - [ ] 🟡 Aggiornare requisiti hardware ground router (specifiche minime 2026)
 - [ ] 🟡 Rimuovere riferimento a LiveCD/LiveUSB (ormai marginale come approccio)
 - [ ] 🟡 "Disabilitare Network Manager" → aggiungere alternativa con `nmcli` per chi preferisce tenerlo attivo
@@ -35,7 +35,7 @@ Legenda priorità:
 
 ## Sezione 6: Configurazione Radio — AirOS (Ubiquiti)
 - [ ] 🔴 AirOS è cambiato significativamente (v8.x+). Verificare se la procedura VLAN/bridge è ancora identica
-- [ ] 🔴 Sostituire comandi `ifconfig` e `vconfig` con equivalenti `ip`
+- [x] 🔴 Sostituire comandi `ifconfig` e `vconfig` con equivalenti `ip`
 - [ ] 🟡 Aggiungere nota su Ubiquiti AirMax AC / airMAX 60GHz e relative differenze di interfaccia
 - [ ] 🟡 Le immagini AirOS sono tutte vuote/rotte — servono nuovi screenshot
 - [ ] 🆕 Considerare aggiunta sezione per UISP / UniFi (se rilevanti per nodi Ninux)
@@ -72,8 +72,8 @@ Legenda priorità:
 - [ ] 🆕 **Sezione ancora `TODO`** — scrivere ex novo con comandi UCI per DSA
 
 ## Sezione 11: Ground Router — Linux Box
-- [ ] 🔴 **`brctl` è deprecato** — sostituire con `ip link add type bridge` / `bridge vlan`
-- [ ] 🔴 Sostituire `ifconfig` con `ip addr` / `ip link`
+- [x] 🔴 **`brctl` è deprecato** — sostituire con `ip link add type bridge` / `bridge vlan`
+- [x] 🔴 Sostituire `ifconfig` con `ip addr` / `ip link`
 - [ ] 🟡 Aggiornare percorso file configurazione olsrd (verificare standard attuale)
 - [ ] 🟡 Aggiornare riferimenti a repo Debian (non più Wheezy)
 - [ ] 🟢 Aggiungere esempio con systemd service unit al posto dello script init
@@ -118,9 +118,9 @@ Legenda priorità:
 
 ## Attività trasversali
 
-- [ ] 🔴 **Sostituire TUTTI gli `ifconfig` con `ip`** in tutta la guida
-- [ ] 🔴 **Sostituire TUTTI i `vconfig` con `ip link add type vlan`** in tutta la guida
-- [ ] 🔴 **Sostituire TUTTI i `brctl` con `ip link add type bridge`** in tutta la guida
+- [x] 🔴 **Sostituire TUTTI gli `ifconfig` con `ip`** in tutta la guida
+- [x] 🔴 **Sostituire TUTTI i `vconfig` con `ip link add type vlan`** in tutta la guida
+- [x] 🔴 **Sostituire TUTTI i `brctl` con `ip link add type bridge`** in tutta la guida
 - [ ] 🟡 **Rifare tutti gli screenshot** — quelli attuali sono tutti placeholder vuoti
 - [ ] 🟡 Uniformare la formattazione Markdown (attualmente inconsistente)
 - [ ] 🟡 Verificare tutti i link esterni (molti saranno rotti)
