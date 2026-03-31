@@ -142,7 +142,7 @@ Torneremo su tutto questo nella sezione dedicata a OpenWRT. Altre possibilità p
 Verrà data per scontata la presenza sul nostro PC di una normale **NIC con porta RJ45 direttamente connessa** alle periferiche da configurare. Se usiamo adattatori USB-to-Ethernet perchè non usufruiamo di una scheda di rete pura oppure se il collegamento passa attraverso uno switch è possibile che si possano verificare anomalie nell’uso di VLAN. Ad esempio, si riesce ad accedere via SSH ma non via HTTPS (interfaccia web).
 
 Infine, questa guida presume che chi configura stia **operando da un sistema operativo Linux**. Se siete utenti di altri sistemi operativi, potete usare una versione avviabile da LiveCD o LiveUSB di una delle tante distribuzioni Linux (le schermate di questa guida si riferiscono ad Ubuntu, ma altre vanno altrettanto bene) e utilizzarla per seguire questo HowTo senza dover procedere all’installazione.  
-Una volta avviato il sistema, l’unico pacchetto aggiuntivo che sarà necessario installare sarà **vlan**, che contiene l’utility *vconfig* che permetterà di impostare le VLAN sul nostro PC.  
+Una volta avviato il sistema, non è necessario installare pacchetti aggiuntivi per gestire le VLAN: il tool **iproute2** (comandi `ip link`, `ip addr`, ecc.) è già installato di default su tutte le distribuzioni Linux moderne e sostituisce completamente le vecchie utility `vconfig` (pacchetto `vlan`) e `ifconfig` (pacchetto `net-tools`), ormai deprecate.
 È bene, salvo quando diversamente specificato in questo howto, **disabilitare il Network Manager** della distribuzione Linux che stiamo utilizzando. La sua presenza sarà più d’intralcio che d’aiuto durante la configurazione del router a terra. Si può fare comodamente dall’icona nella barra di stato, **togliendo la spunta a *Abilita funzionalità di rete*** o voci simili a questa.   
 **Notazione**: Dove compaiono comandi da terminale un prompt “\#:” indica che il comando va eseguito con i permessi di root. Per ottenere i permessi di root definitivamente in un terminale, digitate “sudo su”, inserite la password, e da quel momento in poi ogni comando verrà eseguito come root; in alternativa è possibile anteporre “sudo” di fronte ad ogni comando per eseguire lo stesso come utente root. Un prompt “$:” indica invece che il comando può essere eseguito senza i privilegi di superutente. Un “\#\#” indica invece un commento che illustra la funzione del comando susseguente.
 
@@ -156,10 +156,10 @@ Per consentire la gestione interna dell’antenna (ovvero l’accesso alla sua i
 
 Apriamo un terminale di root e diamo un indirizzo alla nostra scheda di rete:
 
-\#\# attivazione interfaccia  
-\#: ifconfig eth0 up  
-\#\# assegnazione indirizzo  
-\#: ifconfig eth0 192.168.1.2/24
+\#\# attivazione interfaccia
+\#: ip link set eth0 up
+\#\# assegnazione indirizzo
+\#: ip addr add 192.168.1.2/24 dev eth0
 
 Nel browser, logghiamoci nell’interfaccia della nostra antenna (192.168.1.20 se ancora con le impostazioni di fabbrica) e andiamo nel tab **Network**. 
 
@@ -193,21 +193,21 @@ Siamo pronti per salvare il tutto: clicchiamo su **Change** in basso a destra, e
 Se tutto è andato bene… dovremmo avere perso l’accesso all’interfaccia web. Per riguadagnare la schermata di AirOS nel nostro browser dobbiamo dapprima configurare una VLAN con ID 7 (la sola che ora consente l’accesso all’antenna) anche sul nostro PC.   
 Apriamo un terminale di root e digitiamo:
 
-\#\# attivazione interfaccia di rete  
-\#: ifconfig eth0 up  
-\#\# creazione vlan di gestione  
-\#: vconfig add eth0 7  
-\#\# attivazione interfaccia logica  
-\#: ifconfig eth0.7 up  
-\#\# assegnamento indirizzo nella stessa subnet  
-\#: ifconfig eth0.7 10.87.253.100/24  
-\#\# test finale  
+\#\# attivazione interfaccia di rete
+\#: ip link set eth0 up
+\#\# creazione vlan di gestione
+\#: ip link add link eth0 name eth0.7 type vlan id 7
+\#\# attivazione interfaccia logica
+\#: ip link set eth0.7 up
+\#\# assegnamento indirizzo nella stessa subnet
+\#: ip addr add 10.87.253.100/24 dev eth0.7
+\#\# test finale
 $: ping 10.87.253.254
 
 Dovremmo ora osservare l’antenna **rispondere ai nostri ping** (CTRL \+ C per terminare). L’interfaccia di AirOS a questo punto è accessibile all’indirizzo impostato sull’antenna in precedenza (10.87.253.254 nel nostro esempio). Adesso possiamo scollegare l’antenna e dare questi comandi
 
-\#\# togliamo l’indirizzo dalla VLAN 7 del nostro pc, senza cancellarla  
-\#: ifconfig eth0.7 0.0.0.0
+\#\# togliamo l’indirizzo dalla VLAN 7 del nostro pc, senza cancellarla
+\#: ip addr flush dev eth0.7
 
 e ricominciare dall’inizio se abbiamo una seconda antenna. Se questa era la nostra unica antenna, possiamo passare al ground router.
 
@@ -345,10 +345,10 @@ Allo stato attuale, tra i dispositivi OpenWRT compatibili, le scelte consigliabi
 
 Se non è già collegato, colleghiamo il router a terra alla porta ethernet del nostro PC. In un terminale di root:
 
-\#\# attiviamo l’interfaccia  
-\#: ifconfig eth0 up  
-\#\# diamoci un indirizzo per accedere all’interfaccia del router  
-\#: ifconfig eth0 up 192.168.1.2/24
+\#\# attiviamo l’interfaccia
+\#: ip link set eth0 up
+\#\# diamoci un indirizzo per accedere all’interfaccia del router
+\#: ip addr add 192.168.1.2/24 dev eth0
 
 Ora il router sarà accessibile via browser all’indirizzo 192.168.1.1. Prendetevi il tempo per impostare una password, cosa che farà scomparire il continuo promemoria di OpenWRT.
 
@@ -578,10 +578,10 @@ ip link set dev eth0.**2** up
 ip addr add 172.X.Y.W/16 brd 172.X.255.255  dev eth0.**3**  
 ip link set dev eth0.**3** up
 
-**Creazione del Bridge tra managing e rete di casa**  
-brctrl addbr br0  
-brctrl addif br0 eth0**.7**  
-brctrl addif br0 eth1
+**Creazione del Bridge tra managing e rete di casa**
+ip link add name br0 type bridge
+ip link set eth0**.7** master br0
+ip link set eth1 master br0
 
 ip addr add 10.X.Y.Z/24 dev br0  
 ip link set dev br0 up
