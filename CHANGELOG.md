@@ -11,6 +11,9 @@ Il formato è basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 - **Principi di funzionamento**: corretto "801.2Q" → "802.1Q" nella didascalia dell'immagine.
 - **Requisiti**: aggiornate specifiche minime hardware 2026 (128 MB RAM, 16 MB flash, DSA); modernizzato riferimento LiveCD → USB; aggiunta alternativa `nmcli` per chi preferisce tenere NetworkManager attivo; aggiornata nota su USB-to-Ethernet.
 - **Globale**: rebranding "OpenWRT" → "OpenWrt" (minuscola dalla 18.06 in poi) in tutto il documento.
+- **Sezione Linux Box**: aggiornato comando installazione olsrd per Debian/Ubuntu moderne (`apt`); aggiunta nota su `systemctl` per avvio automatico con systemd; rimosso riferimento a installazione "da binario precompilato" come opzione primaria.
+- **Sezione EdgeOS (Ubiquiti EdgeRouter)**: aggiunto box "Attenzione: sezione legacy" — EdgeOS è sostanzialmente EOL, tabella Debian ferma a Wheezy. Consigliata migrazione a OpenWrt o hardware moderno.
+- **Sezione pfSense**: aggiunto box "Attenzione: contenuto datato" — pfSense 2.1.3 / FreeBSD 8.3 obsoleti, percorsi file cambiati, consigliata OPNsense come alternativa moderna.
 - **Sezione Requisiti**: aggiornato il testo che menzionava il pacchetto `vlan` e l'utility `vconfig`; ora spiega che `iproute2` è già presente di default su tutte le distro moderne e sostituisce sia `vconfig` che `ifconfig` (pacchetto `net-tools`, anch'esso deprecato).
 - **Sezione AirOS (Ubiquiti)**: sostituiti tutti i comandi `ifconfig` con `ip link set` / `ip addr add` / `ip addr flush`; sostituito `vconfig add` con `ip link add ... type vlan id`. Aggiunta nota su AirOS v8.x (airMAX AC) e airMAX 60GHz.
 - **Sezione RouterOS (MikroTik)**: riscritta per RouterOS v7 — rimosso "Master Port" (non più esistente), introdotto bridge VLAN filtering a 5 passi. Aggiornato link download Winbox (3.x stabile). Aggiunta WebFig come alternativa per utenti Linux. Vecchia procedura v6 preservata in box "Nota storica".

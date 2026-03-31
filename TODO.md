@@ -74,23 +74,23 @@ Legenda priorità:
 ## Sezione 11: Ground Router — Linux Box
 - [x] 🔴 **`brctl` è deprecato** — sostituire con `ip link add type bridge` / `bridge vlan`
 - [x] 🔴 Sostituire `ifconfig` con `ip addr` / `ip link`
-- [ ] 🟡 Aggiornare percorso file configurazione olsrd (verificare standard attuale)
-- [ ] 🟡 Aggiornare riferimenti a repo Debian (non più Wheezy)
-- [ ] 🟢 Aggiungere esempio con systemd service unit al posto dello script init
+- [x] 🟡 Aggiornare percorso file configurazione olsrd (verificare standard attuale)
+- [x] 🟡 Aggiornare riferimenti a repo Debian (non più Wheezy)
+- [x] 🟢 Aggiungere esempio con systemd service unit al posto dello script init
 
 ## Sezione 12: Ground Router — EdgeOS (Ubiquiti EdgeRouter)
-- [ ] 🔴 **EdgeOS è sostanzialmente EOL** — Ubiquiti non rilascia più aggiornamenti significativi
-- [ ] 🔴 Tabella compatibilità EdgeOS/Debian ferma a Wheezy — completamente obsoleta
-- [ ] 🟡 Valutare se mantenere la sezione come "legacy" o rimuoverla
+- [x] 🔴 **EdgeOS è sostanzialmente EOL** — Ubiquiti non rilascia più aggiornamenti significativi
+- [x] 🔴 Tabella compatibilità EdgeOS/Debian ferma a Wheezy — completamente obsoleta
+- [x] 🟡 Valutare se mantenere la sezione come "legacy" o rimuoverla
 - [ ] 🆕 Considerare aggiunta sezione per Ubiquiti EdgeRouter con firmware alternativo (OpenWrt) o per UISP Router
 
 ## Sezione 13: Ground Router — pfSense
-- [ ] 🔴 pfSense 2.1.3 / FreeBSD 8.3 è totalmente obsoleto — aggiornare a pfSense 2.7+ / FreeBSD 14
-- [ ] 🔴 Percorsi file (`/usr/pbi/`) non esistono più nelle versioni recenti
-- [ ] 🔴 OLSRD 0.6.3 è antico — verificare disponibilità pacchetti aggiornati per pfSense attuale
-- [ ] 🟡 Sezione NAT: concetti validi, aggiornare interfaccia
+- [x] 🔴 pfSense 2.1.3 / FreeBSD 8.3 è totalmente obsoleto — aggiornare a pfSense 2.7+ / FreeBSD 14
+- [x] 🔴 Percorsi file (`/usr/pbi/`) non esistono più nelle versioni recenti
+- [x] 🔴 OLSRD 0.6.3 è antico — verificare disponibilità pacchetti aggiornati per pfSense attuale
+- [x] 🟡 Sezione NAT: concetti validi, aggiornare interfaccia
 - [ ] 🟡 Le sezioni "Configurazione VLAN" e "Configurazione interfacce" sono ancora `TODO`
-- [ ] 🆕 Considerare aggiunta OPNsense come alternativa (fork attivo, più aggiornato)
+- [x] 🆕 Considerare aggiunta OPNsense come alternativa (fork attivo, più aggiornato)
 
 ## Sezione 14: Policy Routing
 - [ ] 🟡 I concetti e la logica delle tabelle sono ancora validi
