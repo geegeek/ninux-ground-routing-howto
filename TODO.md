@@ -9,29 +9,29 @@ Legenda priorità:
 ---
 
 ## Sezione 1: Prefazione
-- [ ] 🟢 Aggiornare il tono per indicare che si tratta di una revisione 2026 della guida originale
+- [x] 🟢 Aggiornare il tono per indicare che si tratta di una revisione 2026 della guida originale
 
 ## Sezione 2: Introduzione
-- [ ] 🟡 Storicizzare i riferimenti a Sburratone e Scooreggione (sono storia, non più la situazione corrente)
-- [ ] 🟡 Aggiornare il riferimento a OpenWRT 12.09 Attitude Adjustment → OpenWrt 23.05 Langur / 24.10
-- [ ] 🟢 Nota sul rebranding: "OpenWRT" → "OpenWrt" (minuscola dalla 18.06 in poi)
+- [x] 🟡 Storicizzare i riferimenti a Sburratone e Scooreggione (sono storia, non più la situazione corrente)
+- [x] 🟡 Aggiornare il riferimento a OpenWRT 12.09 Attitude Adjustment → OpenWrt 23.05 Langur / 24.10
+- [x] 🟢 Nota sul rebranding: "OpenWRT" → "OpenWrt" (minuscola dalla 18.06 in poi)
 
 ## Sezione 3: Principi di funzionamento (Bridge + VLAN)
-- [ ] 🟢 I concetti sono ancora validi — nessuna modifica strutturale necessaria
+- [x] 🟢 I concetti sono ancora validi — nessuna modifica strutturale necessaria
 - [ ] 🟢 Completare i `[TODO]` con box tecnici più approfonditi
-- [ ] 🟢 Correggere "801.2Q" → "802.1Q" nella didascalia dell'immagine
+- [x] 🟢 Correggere "801.2Q" → "802.1Q" nella didascalia dell'immagine
 
 ## Sezione 4: Vantaggi del routing a terra
-- [ ] 🟢 Contenuto concettualmente valido, nessuna modifica necessaria
+- [x] 🟢 Contenuto concettualmente valido, nessuna modifica necessaria
 - [ ] 🟢 Aggiornare/sostituire l'immagine di architettura (attualmente vuota/rotta)
 
 ## Sezione 5: Requisiti
 - [x] 🔴 **`vconfig` è deprecato** — sostituire con `ip link add ... type vlan id ...` (iproute2)
 - [x] 🔴 **`ifconfig` è deprecato** — sostituire con `ip addr` / `ip link` in tutta la guida
-- [ ] 🟡 Aggiornare requisiti hardware ground router (specifiche minime 2026)
-- [ ] 🟡 Rimuovere riferimento a LiveCD/LiveUSB (ormai marginale come approccio)
-- [ ] 🟡 "Disabilitare Network Manager" → aggiungere alternativa con `nmcli` per chi preferisce tenerlo attivo
-- [ ] 🟢 Nota su USB-to-Ethernet: meno problematico nel 2026 con driver maturi
+- [x] 🟡 Aggiornare requisiti hardware ground router (specifiche minime 2026)
+- [x] 🟡 Rimuovere riferimento a LiveCD/LiveUSB (ormai marginale come approccio)
+- [x] 🟡 "Disabilitare Network Manager" → aggiungere alternativa con `nmcli` per chi preferisce tenerlo attivo
+- [x] 🟢 Nota su USB-to-Ethernet: meno problematico nel 2026 con driver maturi
 
 ## Sezione 6: Configurazione Radio — AirOS (Ubiquiti)
 - [x] 🔴 AirOS è cambiato significativamente (v8.x+). Verificare se la procedura VLAN/bridge è ancora identica

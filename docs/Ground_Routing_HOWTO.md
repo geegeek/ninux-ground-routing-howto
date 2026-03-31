@@ -12,22 +12,22 @@
 [RouterOS (Mikrotik)](#routeros-\(mikrotik\))  
 [Connessione all’apparato](#connessione-all’apparato)  
 [Configurazione ip, vlan e bridge](#configurazione-ip,-vlan-e-bridge)  
-[OpenWRT](#openwrt)  
+[OpenWrt](#openwrt)  
 [Adhoc/Client Mode](#adhoc/client-mode)  
 [Configurazione Ground Router](#configurazione-ground-router)  
-[OpenWRT (LuCI)](#openwrt-\(luci\))  
+[OpenWrt (LuCI)](#openwrt-\(luci\))  
 [Cosa c’è da sapere sulle interfacce di rete in OpenWrt (DSA)](#cosa-c’è-da-sapere-sulle-interfacce-di-rete-in-openwrt-(dsa))
 [Router OpenWrt-compatibili: Dispositivi consigliati](#router-openwrt-compatibili:-dispositivi-consigliati)
 [Preparazione](#preparazione)
 [Analisi delle interfacce di rete](#analisi-delle-interfacce-di-rete)
 [Precauzioni](#precauzioni)  
 [Creazione delle VLAN](#creazione-delle-vlan)  
-[Creazione e configurazione delle Network OpenWRT](#creazione-e-configurazione-delle-network-openwrt)  
+[Creazione e configurazione delle Network OpenWrt](#creazione-e-configurazione-delle-network-openwrt)  
 [Routing: OLSR](#routing:-olsr)  
 [Routing: Batman](#routing:-batman)  
 [Firewalling](#firewalling)  
 [Passi finali](#passi-finali)  
-[OpenWRT (CLI/UCI)](#openwrt-\(cli/uci\))  
+[OpenWrt (CLI/UCI)](#openwrt-\(cli/uci\))  
 [Linux Box](#linux-box)  
 [EdgeOS (Ubiquiti EdgeRouter)](#edgeos-\(ubiquiti-edgerouter\))  
 [pfSense](#pfsense)  
@@ -40,7 +40,7 @@
 [Controllare OLSRD durante il funzionamento](#controllare-olsrd-durante-il-funzionamento)  
 [Policy Routing](#policy-routing)  
 Configurazione OLSR  
-[OpenWRT](#openwrt-1)  
+[OpenWrt](#openwrt-1)  
 [Linux Box](#linux-box-1)  
 [EdgeOS (Ubiquiti EdgeRouter)](#configurazione-scripts-per-edgeos-\(ubiquiti-edgerouter\))  
 [pfSense](#heading=h.7271elhuefja)  
@@ -52,9 +52,12 @@ Compilazione OLSR
 
 # **Prefazione** {#prefazione}
 
-L’obiettivo di questo HowTo è di guidare passo-passo un nuovo ingresso in Ninux nella configurazione del proprio nodo utilizzando il routing a terra, ma è da ritenersi adatta anche per chi voglia aggiornare il proprio nodo al routing a terra.  
-Questa guida è scritta avendo principalmente in mente i nuovi ingressi in Ninux che non hanno grandi conoscenze in fatto di networking e come tale presuppone il minimo indispensabile: chi sa già come configurare una tipica rete locale (router domestici e interfacce di rete dei propri PC) non dovrebbe avere problemi a seguire questo documento (se ne ha è un bug, segnalatecelo\!). I più esperti possono tranquillamente saltare alle parti per loro rilevanti.  
-Ogni passo necessario è diviso in sottosezioni in base al sistema operativo/ambiente da configurare. Questa guida non tratta di come procedere all’installazione/flash di questi sistemi operativi sui relativi device, ma dove possibile rimanda ad altra documentazione presente nel wiki Ninux o sulla rete.  
+L’obiettivo di questo HowTo è di guidare passo-passo un nuovo ingresso in Ninux nella configurazione del proprio nodo utilizzando il routing a terra, ma è da ritenersi adatta anche per chi voglia aggiornare il proprio nodo al routing a terra.
+
+> **Revisione 2026**: questa guida è stata originariamente scritta tra il 2014 e il 2016. La versione che state leggendo è una **revisione aggiornata al 2026** che tiene conto dei cambiamenti avvenuti nei sistemi operativi, nei protocolli e nell’hardware nel frattempo. Le sezioni con contenuto storico sono chiaramente contrassegnate con box "Nota storica".
+
+Questa guida è scritta avendo principalmente in mente i nuovi ingressi in Ninux che non hanno grandi conoscenze in fatto di networking e come tale presuppone il minimo indispensabile: chi sa già come configurare una tipica rete locale (router domestici e interfacce di rete dei propri PC) non dovrebbe avere problemi a seguire questo documento (se ne ha è un bug, segnalatecelo\!). I più esperti possono tranquillamente saltare alle parti per loro rilevanti.
+Ogni passo necessario è diviso in sottosezioni in base al sistema operativo/ambiente da configurare. Questa guida non tratta di come procedere all’installazione/flash di questi sistemi operativi sui relativi device, ma dove possibile rimanda ad altra documentazione presente nel wiki Ninux o sulla rete.
 **Nota**: Per aprire le immagini di questa guida in alta risoluzione, è sufficiente cliccare col tasto centrale.
 
 # **Introduzione** {#introduzione}
@@ -63,11 +66,15 @@ Un nodo Ninux, sia esso un nodo foglia o un supernodo, può essere composto da d
 
 **Il *routing a terra* è una tipologia di configurazione per un nodo in cui tutta l’attività di inoltro del traffico ad opera del demone di routing (sia esso OLSR, batman o altro), ed in generale il maggior numero di componenti software necessarie, risultano concentrate in un unico dispositivo diverso dall’antenna, detto appunto *router a terra* o *ground router* (GR).**
 
-Per capire i vantaggi di questa configurazione facciamo prima una breve panoramica delle altre modalità di configurazione finora più utilizzate nella rete Ninux.
+Per capire i vantaggi di questa configurazione facciamo prima una breve panoramica delle altre modalità di configurazione utilizzate storicamente nella rete Ninux, e di come il routing a terra sia diventato l’approccio consigliato.
 
-Fino al 2012 la comunità Ninux produceva una versione modificata del sistema operativo AirOS (il firmware di fabbrica delle Ubiquiti, le antenne di gran lunga più utilizzate nella nostra rete) soprannominata *Sburratone*, che integrava il demone di routing OLSR all’interno di AirOS. Al netto di qualche problemino dovuto alla scarsa integrazione tra OLSR e l’interfaccia di AirOS, questo firmware funzionava bene e consentiva di avere un unico pacchetto “pronto”. Questa mod era possibile perché la Ubiquiti metteva a disposizione un SDK con cui gli sviluppatori Ninux potevano creare eseguibili di terze parti compatibili con AirOS. Sfortunatamente, a partire dalla versione successiva alla 5.5.2, la Ubiquiti non solo ha smesso di rilasciare l’SDK, ma ha anche revocato le licenze di quelli già rilasciati.
+> **Contesto storico**
+>
+> Fino al 2012 la comunità Ninux produceva una versione modificata del sistema operativo AirOS (il firmware di fabbrica delle Ubiquiti, le antenne di gran lunga più utilizzate nella nostra rete) soprannominata *Sburratone*, che integrava il demone di routing OLSR all’interno di AirOS. Questa mod era possibile grazie ad un SDK fornito da Ubiquiti, ma a partire dalla versione successiva alla 5.5.2 l’SDK fu revocato, rendendo impossibile aggiornare il firmware.
+>
+> Si passò quindi ad un firmware basato su OpenWrt denominato *Scooreggione*, che però comportava delle limitazioni. Il routing a terra è nato come soluzione a questi problemi, separando l’intelligenza di routing dall’antenna, e si è affermato come configurazione standard per i nodi Ninux.
 
-Trovandosi impossibilitati ad aggiornare le vecchie antenne a nuove versioni del sistema base (e quindi patchare eventuali bug o problemi di sicurezza\!), e ad installare il vecchio Sburratone sulle revisioni più recenti dell’hardware Ubiquiti, si è deciso di creare un nuovo firmware, questa volta basato sulla distribuzione embedded open source denominata OpenWRT. Questa nuova mod, basata attualmente sulla versione 12.09 Attitude Adjustment, è stata ribattezzata *Scooreggione*. Essendo completamente FOSS (Free Open Source Software) il nuovo sistema mette al riparo da chiusure improvvise stile-Ubiquiti e consente personalizzazioni molto più estese e più semplici. Tuttavia, questa configurazione comporta delle restrizioni e delle problematiche, sia concrete che potenziali (sulle quali torneremo a breve) che possono essere interamente evitate col routing a terra.
+Oggi il routing a terra è l’approccio raccomandato. Le sezioni successive di questa guida fanno riferimento alle versioni correnti dei sistemi operativi: **OpenWrt 23.05+** (con DSA), **RouterOS v7.x** (con bridge VLAN filtering), **AirOS v5-v8.x** e sistemi **GNU/Linux** moderni con `iproute2`.
 
 # **Principi di funzionamento del routing a terra** {#principi-di-funzionamento-del-routing-a-terra}
 
@@ -111,7 +118,7 @@ Perchè una porta può essere impostata untagged solo in **una** della VLAN di c
 **Sicurezza**: il ground router rappresenta un unico dispositivo “di frontiera” tra la propria rete locale e la rete Ninux, e in quanto tale diventa molto più semplice gestire e tenere aggiornate regole di firewall, tunnel e accessi.
 
 ![ground\_routing.png][image1]  
-*In figura una configurazione classica, una CPE è station verso un AP, un’altra distribuisce come AP oppure è in modalità station, la porta 2 è collegata ad uno switch o ad una workstation in rete 10.87.x.x/24 mentre la porta 1 fà NAT verso una rete privata che non ha routing verso Ninux. Ogni rete è isolata a livello logico grazie alla tecnologia 801.2Q (VLAN) e comunica con le altre mediante forward e routing oppure NAT.*
+*In figura una configurazione classica, una CPE è station verso un AP, un’altra distribuisce come AP oppure è in modalità station, la porta 2 è collegata ad uno switch o ad una workstation in rete 10.87.x.x/24 mentre la porta 1 fà NAT verso una rete privata che non ha routing verso Ninux. Ogni rete è isolata a livello logico grazie alla tecnologia 802.1Q (VLAN) e comunica con le altre mediante forward e routing oppure NAT.*
 
 # **Requisiti** {#requisiti}
 
@@ -125,31 +132,35 @@ Infine il pezzo forte, il **ground router**. Come detto, il dispositivo che far�
 * Supporto alle VLAN.  
 * Possibilità di installare il protocollo di routing desiderato, come ad esempio OLSR o Batman. Generalmente questo si traduce direttamente nell’avere un firmware basato su Linux o BSD.
 
-Di hardware che soddisfa queste caratteristiche ce n’è un’infinità, ma al 95% quello di cui avrete bisogno è un **router domestico compatibile con OpenWRT**. [Ce ne sono tanti tra cui scegliere](http://wiki.openwrt.org/toh/start), ma consigliamo di optare uno con le seguenti specifiche:
+Di hardware che soddisfa queste caratteristiche ce n’è un’infinità, ma al 95% quello di cui avrete bisogno è un **router domestico compatibile con OpenWrt**. [Ce ne sono tanti tra cui scegliere](https://openwrt.org/toh/start), ma nel 2026 consigliamo di optare per uno con le seguenti specifiche minime:
 
-* switch gigabit,   
-* almeno 64MB di RAM   
-* almeno 8MB di memoria flash  
-* privo di bug noti nella gestione delle VLAN.
+* switch **gigabit**
+* almeno **128 MB di RAM** (256 MB consigliati per supernodi)
+* almeno **16 MB di memoria flash** (128 MB consigliati)
+* supporto **DSA** (Distributed Switch Architecture) in OpenWrt 23.05+
+* privo di bug noti nella gestione delle VLAN
 
-Torneremo su tutto questo nella sezione dedicata a OpenWRT. Altre possibilità per il router a terra sono:
+Torneremo su tutto questo nella sezione dedicata a OpenWrt. Altre possibilità per il router a terra sono:
 
-* un router professionale con un firmware Linux-based, come l’**Ubiquiti EdgeRouter** e il suo sistema EdgeOS (difficilmente battibile come rapporto qualità/prezzo in funzione delle necessità di Ninux).  
-* Un **computer dedicato con più schede di rete**, su cui poi installare un sistema operativo GNU/Linux o una distribuzione firewall come pfSense.  
-* Una **board embedded** come le routerboard o le Alix, sulle quali installare OpenWRT, GNU/Linux, pfSense, o simili.
+* Un **computer dedicato con più schede di rete**, su cui poi installare un sistema operativo GNU/Linux o una distribuzione firewall come pfSense o OPNsense.
+* Una **board embedded** come le BananaPi BPI-R3/R4 o le MikroTik RouterBOARD, sulle quali installare OpenWrt, GNU/Linux o RouterOS.
 
-Verrà data per scontata la presenza sul nostro PC di una normale **NIC con porta RJ45 direttamente connessa** alle periferiche da configurare. Se usiamo adattatori USB-to-Ethernet perchè non usufruiamo di una scheda di rete pura oppure se il collegamento passa attraverso uno switch è possibile che si possano verificare anomalie nell’uso di VLAN. Ad esempio, si riesce ad accedere via SSH ma non via HTTPS (interfaccia web).
+Verrà data per scontata la presenza sul nostro PC di una normale **NIC con porta RJ45 direttamente connessa** alle periferiche da configurare. Gli **adattatori USB-to-Ethernet** nel 2026 funzionano generalmente bene grazie a driver maturi, ma se il collegamento passa attraverso uno switch non gestito è possibile che si verifichino anomalie nell’uso di VLAN. Ad esempio, si riesce ad accedere via SSH ma non via HTTPS (interfaccia web). In caso di problemi, provate con un collegamento diretto.
 
-Infine, questa guida presume che chi configura stia **operando da un sistema operativo Linux**. Se siete utenti di altri sistemi operativi, potete usare una versione avviabile da LiveCD o LiveUSB di una delle tante distribuzioni Linux (le schermate di questa guida si riferiscono ad Ubuntu, ma altre vanno altrettanto bene) e utilizzarla per seguire questo HowTo senza dover procedere all’installazione.  
+Infine, questa guida presume che chi configura stia **operando da un sistema operativo Linux**. Se siete utenti di altri sistemi operativi, potete avviare una distribuzione Linux da chiavetta USB (le schermate di questa guida si riferiscono ad Ubuntu, ma altre vanno altrettanto bene) e utilizzarla per seguire questo HowTo senza dover procedere all’installazione.
 Una volta avviato il sistema, non è necessario installare pacchetti aggiuntivi per gestire le VLAN: il tool **iproute2** (comandi `ip link`, `ip addr`, ecc.) è già installato di default su tutte le distribuzioni Linux moderne e sostituisce completamente le vecchie utility `vconfig` (pacchetto `vlan`) e `ifconfig` (pacchetto `net-tools`), ormai deprecate.
-È bene, salvo quando diversamente specificato in questo howto, **disabilitare il Network Manager** della distribuzione Linux che stiamo utilizzando. La sua presenza sarà più d’intralcio che d’aiuto durante la configurazione del router a terra. Si può fare comodamente dall’icona nella barra di stato, **togliendo la spunta a *Abilita funzionalità di rete*** o voci simili a questa.   
+È bene, salvo quando diversamente specificato in questo howto, **disabilitare il NetworkManager** della distribuzione Linux che stiamo utilizzando. La sua presenza sarà più d’intralcio che d’aiuto durante la configurazione del router a terra. Si può fare dall’icona nella barra di stato, **togliendo la spunta a *Abilita funzionalità di rete*** o voci simili a questa. In alternativa, chi preferisce tenere NetworkManager attivo può usare `nmcli` per gestire le interfacce direttamente da terminale senza conflitti, ad esempio:
+
+\#\# disabilitare la gestione automatica di un’interfaccia specifica
+\#: nmcli device set eth0 managed no
+
 **Notazione**: Dove compaiono comandi da terminale un prompt “\#:” indica che il comando va eseguito con i permessi di root. Per ottenere i permessi di root definitivamente in un terminale, digitate “sudo su”, inserite la password, e da quel momento in poi ogni comando verrà eseguito come root; in alternativa è possibile anteporre “sudo” di fronte ad ogni comando per eseguire lo stesso come utente root. Un prompt “$:” indica invece che il comando può essere eseguito senza i privilegi di superutente. Un “\#\#” indica invece un commento che illustra la funzione del comando susseguente.
 
 # **Configurazione Radio** {#configurazione-radio}
 
 La configurazione della parte **wireless** e di tutto il resto del firmware dell’antenna non cambia col routing a terra rispetto alle altre configurazioni in uso nella rete Ninux, e pertanto non verranno trattate in questa guida.  
 Ecco cosa andremo a fare: metteremo l’antenna in modalità bridge e sostituiremo il bridge di default tra wireless e LAN0 con uno tra wireless e una VLAN; questa VLAN sarà destinata ad accogliere il traffico in ingresso/uscita da/verso il nodo remoto, proprio come se fosse direttamente connessa ad esso, e sarà diversa (tag VLAN differente) per ognuna delle nostre antenne.  
-Per consentire la gestione interna dell’antenna (ovvero l’accesso alla sua interfaccia web) estenderemo i normali indirizzi della nostra rete locale alle antenne. Per farlo creeremo una seconda VLAN, **comune** (stesso tag VLAN) a tutte le nostre antenne, e la designeremo come interfaccia per il managing. In questo modo le antenne si comporteranno proprio come se fossero PC sulla nostra rete locale. La creazione della seconda VLAN potrebbe essere evitata, ma solo se il nostro ground router è in grado di gestire traffico taggato e non taggato su una medesima porta. Sfortunatamente molti router OpenWRT non sono in grado di farlo, e pertanto aggireremo il problema taggando sempre anche il traffico “interno”. Approfondiremo la questione nella sezione dedicata a OpenWRT. 
+Per consentire la gestione interna dell’antenna (ovvero l’accesso alla sua interfaccia web) estenderemo i normali indirizzi della nostra rete locale alle antenne. Per farlo creeremo una seconda VLAN, **comune** (stesso tag VLAN) a tutte le nostre antenne, e la designeremo come interfaccia per il managing. In questo modo le antenne si comporteranno proprio come se fossero PC sulla nostra rete locale. La creazione della seconda VLAN potrebbe essere evitata, ma solo se il nostro ground router è in grado di gestire traffico taggato e non taggato su una medesima porta. Sfortunatamente molti router OpenWrt non sono in grado di farlo, e pertanto aggireremo il problema taggando sempre anche il traffico “interno”. Approfondiremo la questione nella sezione dedicata a OpenWrt. 
 
 ## **AirOS (Ubiquiti)** {#airos-(ubiquiti)}
 
@@ -172,7 +183,7 @@ Compariranno molte altre impostazioni di configurazione divise in sezioni; espan
 
 Per prima cosa **creiamo le VLAN sull’intefaccia LAN0** in VLAN Network. Per farlo ci basterà **compilare il campo VLAN ID** e cliccare sul tasto **Add**. Opzionalmente possiamo lasciare un commento che descrive l’utilizzo della VLAN.
 
-* Per prima creiamo la “VLAN di traffico wireless” col nodo remoto. Essendo il VLAN ID 1 riservato in AirOS, e i VLAN ID 1 e 2 spesso già creati in OpenWRT, è preferibile cominciare dal **VLAN ID 3**. Se abbiamo altre antenne è meglio usare VLAN ID progressivi: 4, 5, 6 e così via.  
+* Per prima creiamo la “VLAN di traffico wireless” col nodo remoto. Essendo il VLAN ID 1 riservato in AirOS, e i VLAN ID 1 e 2 spesso già creati in OpenWrt, è preferibile cominciare dal **VLAN ID 3**. Se abbiamo altre antenne è meglio usare VLAN ID progressivi: 4, 5, 6 e così via.  
 * Ora creiamo la “VLAN di gestione” interna che renderà le antenne parte  della (e accessibili dalla) nostra rete locale. Qualsiasi VLAN ID va bene, ma è preferibile tenersi sul primo lasciato libero dalle “VLAN di traffico wireless” e darne uno minore di 16, ad esempio **VLAN ID 7**. L’importante, se si hanno altre antenne, è configurare la VLAN di gestione sempre con lo stesso ID (7 in questo esempio).
 
 Ora cambiamo l’interfaccia di gestione: in Management Network Settings selezioniamo **Management Interface: LAN0.7** e configuriamola:
@@ -303,7 +314,7 @@ Se abbiamo altri apparati ricominciamo dall'inizio per la loro configurazione, a
 >
 > Nella versione precedente di questa guida, la procedura prevedeva l'uso del **Master Port** per isolare le porte Ethernet dello switch interno. Questo meccanismo è stato completamente rimosso in RouterOS v7: al suo posto si utilizza il bridge con VLAN filtering, come descritto sopra. Se state ancora usando RouterOS v6.x, la vecchia procedura prevedeva: doppio click sulla porta Ethernet > impostare "Master Port" su "none" per ogni porta. Tuttavia, è fortemente consigliato aggiornare a RouterOS v7.x per beneficiare della gestione VLAN moderna e del supporto attivo da parte di MikroTik.
 
-## **OpenWRT** {#openwrt}
+## **OpenWrt** {#openwrt}
 
 TODO 
 
@@ -319,9 +330,9 @@ Così facendo avremo creato l’equivalente di un bridge  e potremo trattare  il
 
 # **Configurazione Ground Router**  {#configurazione-ground-router}
 
-## **OpenWRT (LuCI)** {#openwrt-(luci)}
+## **OpenWrt (LuCI)** {#openwrt-(luci)}
 
-Ok, avete flashato OpenWRT fresco fresco sul vostro router a terra e vi siete loggati nell’interfaccia web LuCI (192.168.1.1). Configurarlo attraverso l’interfaccia grafica nel proprio browser è certamente più semplice per chi ha appena iniziato in Ninux, ma richiede delle particolari attenzioni che saranno discusse nel corso di questa sezione.
+Ok, avete flashato OpenWrt fresco fresco sul vostro router a terra e vi siete loggati nell’interfaccia web LuCI (192.168.1.1). Configurarlo attraverso l’interfaccia grafica nel proprio browser è certamente più semplice per chi ha appena iniziato in Ninux, ma richiede delle particolari attenzioni che saranno discusse nel corso di questa sezione.
 
 ### **Cosa c’è da sapere sulle interfacce di rete in OpenWrt (DSA)** {#cosa-c’è-da-sapere-sulle-interfacce-di-rete-in-openwrt-(dsa)}
 
@@ -368,7 +379,7 @@ Se non è già collegato, colleghiamo il router a terra alla porta ethernet del 
 \#\# diamoci un indirizzo per accedere all’interfaccia del router
 \#: ip addr add 192.168.1.2/24 dev eth0
 
-Ora il router sarà accessibile via browser all’indirizzo 192.168.1.1. Prendetevi il tempo per impostare una password, cosa che farà scomparire il continuo promemoria di OpenWRT.
+Ora il router sarà accessibile via browser all’indirizzo 192.168.1.1. Prendetevi il tempo per impostare una password, cosa che farà scomparire il continuo promemoria di OpenWrt.
 
 ### **Analisi delle interfacce di rete** {#analisi-delle-interfacce-di-rete}
 
@@ -441,7 +452,7 @@ Qualora tutte le porte siano state contrassegnate come tagged, per riguadagnare 
 
 **In caso di problemi**: se la configurazione VLAN non funziona, potete sfruttare la backdoor WAN per accedere a LuCI e resettare il router alle impostazioni di fabbrica.
 
-### **Creazione e configurazione delle Network OpenWRT** {#creazione-e-configurazione-delle-network-openwrt}
+### **Creazione e configurazione delle Network OpenWrt** {#creazione-e-configurazione-delle-network-openwrt}
 
 Andate in **Network \> Interface**.  
 Nella Network **LAN** cliccate **Edit**.  
@@ -555,7 +566,7 @@ Se non l’avevamo già fatto, colleghiamoci di nuovo alle antenne ed **effettui
 Infine colleghiamoci al nostro ground router e andiamo nella sezione **Status \> Routes**. Entro breve dovrebbero **apparire le rotte verso gli altri nodi Ninux** apprese attraverso il protocollo di routing che stiamo utilizzando.  
 **Benvenuti in Ninux**\!
 
-## **OpenWRT (CLI/UCI)** {#openwrt-(cli/uci)}
+## **OpenWrt (CLI/UCI)** {#openwrt-(cli/uci)}
 
 TODO
 
@@ -1107,7 +1118,7 @@ ip route add blackhole 192.168.0.0/16 table 114
 \#Blackhole Ninux aggregate  
 \#ip route add blackhole 176.62.53.0/24 table 114
 
-# **OpenWRT** {#openwrt-1}
+# **OpenWrt** {#openwrt-1}
 
 # **Linux Box** {#linux-box-1}
 
