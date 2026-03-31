@@ -316,17 +316,43 @@ Se abbiamo altri apparati ricominciamo dall'inizio per la loro configurazione, a
 
 ## **OpenWrt** {#openwrt}
 
-TODO 
+Se la vostra antenna monta **OpenWrt** (ad esempio un dispositivo TP-Link, Xiaomi o altro compatibile usato come CPE), la configurazione di VLAN e bridge può essere fatta direttamente da **LuCI** o via **UCI** (linea di comando).
+
+**Configurazione via LuCI (OpenWrt 23.05+ con DSA)**
+
+1. Accedete all’interfaccia web dell’antenna (di default 192.168.1.1).
+2. Andate in **Network > Interfaces**, tab **Devices**.
+3. Sul bridge **br-lan**, cliccate **Configure** e abilitate **VLAN filtering**.
+4. Create le VLAN necessarie (traffico wireless e gestione), assegnando le porte come tagged o untagged secondo lo stesso schema descritto nella sezione AirOS.
+5. Create i dispositivi VLAN (br-lan.3, br-lan.7, ecc.) nel tab **Devices**.
+6. In **Network > Interfaces**, create un nuovo bridge tra l’interfaccia wireless e il dispositivo VLAN di traffico (br-lan.X). Assegnate alla LAN il dispositivo VLAN di gestione (br-lan.7).
+7. Configurate l’indirizzo IP di gestione sull’interfaccia LAN (sulla VLAN di gestione).
+8. **Save & Apply**.
+
+**Configurazione via UCI (da SSH)**
+
+\#\# creazione delle VLAN sul bridge
+\#: uci set network.br_lan.vlan_filtering=’1’
+\#: uci add network bridge-vlan
+\#: uci set network.@bridge-vlan[-1].device=’br-lan’
+\#: uci set network.@bridge-vlan[-1].vlan=’3’
+\#: uci add_list network.@bridge-vlan[-1].ports=’lan1:t’
+\#\# ripetere per ogni VLAN necessaria (4, 7, ecc.)
+\#: uci commit network
+\#: service network restart
+
+Per una guida completa alla configurazione UCI con DSA, vedi la sezione "OpenWrt (CLI/UCI)" più avanti in questa guida.
 
 ### **Adhoc/Client Mode** {#adhoc/client-mode}
 
-Non essendo possibile su openwrt inserire interfacce in client o in ad-hoc all’interno di un bridge dovremo utilizzare il pacchetto trelay e creare questo pseudo-bridge a livello user space.  
-Per installarlo ci basterà scaricarlo dal packet manager  
-opkg update  
-opkg install trelay
+Su OpenWrt non è possibile inserire interfacce wireless in modalità client o ad-hoc all’interno di un bridge standard. Per aggirare questa limitazione si può usare il pacchetto **relayd**, che crea un relay a livello di layer 2 tra due interfacce:
 
-dopodiché andremo a configurare /etc/config/trelay inserendo al posto delle 2 interfacce la nostra interfaccia in client/ ad-hoc e la nostra vlan per il traffico verso terra.  
-Così facendo avremo creato l’equivalente di un bridge  e potremo trattare  il nostro traffico a terra in maniera trasparente.
+\#: opkg update
+\#: opkg install relayd luci-proto-relay
+
+Dopo l’installazione, in **Network > Interfaces** create una nuova interfaccia con protocollo **Relay bridge** e selezionate le due interfacce da collegare: l’interfaccia wireless in client/ad-hoc e la VLAN per il traffico verso terra.
+
+> **Nota storica**: nelle versioni precedenti di questa guida si faceva riferimento al pacchetto `trelay`. Questo pacchetto è stato sostituito da **relayd** che offre migliore compatibilità e integrazione con LuCI.
 
 # **Configurazione Ground Router**  {#configurazione-ground-router}
 
@@ -528,7 +554,49 @@ Clicchiamo su Add e compiliamo i campi
 
 ### **Routing: Batman** {#routing:-batman}
 
-TODO
+**B.A.T.M.A.N. Advanced** (batman-adv) è un protocollo di routing mesh che opera a livello 2 (layer 2), a differenza di OLSR che opera a livello 3. Questo significa che batman-adv crea un unico dominio di broadcast tra tutti i nodi partecipanti, come se fossero collegati ad un unico grande switch virtuale.
+
+Per installare batman-adv su OpenWrt:
+
+\#: opkg update
+\#: opkg install kmod-batman-adv batctl luci-proto-batman-adv
+
+**Configurazione via LuCI**
+
+1. Andate in **Network > Interfaces** e cliccate su **Add new Interface**.
+2. Scegliete un nome (ad esempio **batmesh**) e come protocollo selezionate **Batman Device**.
+3. Nella configurazione dell'interfaccia, impostate il **mesh mode** e selezionate le interfacce che parteciperanno al mesh (le VLAN di traffico wireless verso le antenne).
+4. Create una seconda interfaccia di tipo **Static address** associata al dispositivo **bat0** (che verrà creato automaticamente da batman-adv) e assegnatele l'indirizzo IP dorsale Ninux.
+
+**Configurazione via UCI**
+
+\#\# configurazione batman-adv
+\#: uci set network.batmesh=interface
+\#: uci set network.batmesh.proto='batadv'
+\#: uci set network.batmesh.routing_algo='BATMAN_IV'
+\#: uci set network.batmesh.aggregated_ogms='1'
+\#: uci set network.batmesh.bridge_loop_avoidance='1'
+\#\# aggiungere le interfacce mesh
+\#: uci set network.bat_hardif_1=interface
+\#: uci set network.bat_hardif_1.proto='batadv_hardif'
+\#: uci set network.bat_hardif_1.master='batmesh'
+\#: uci set network.bat_hardif_1.device='br-lan.3'
+\#\# configurazione IP su bat0
+\#: uci set network.ninux=interface
+\#: uci set network.ninux.proto='static'
+\#: uci set network.ninux.device='bat0'
+\#: uci set network.ninux.ipaddr='172.X.Y.Z'
+\#: uci set network.ninux.netmask='255.255.0.0'
+\#: uci commit network
+\#: service network restart
+
+Per verificare lo stato del mesh:
+
+$: batctl o
+
+Questo comando mostrerà i nodi vicini (originators) raggiungibili via batman-adv.
+
+> **Nota**: OLSR e Batman sono due approcci diversi al routing mesh. La scelta dipende dall'isola Ninux di appartenenza. In alcune isole si usa esclusivamente OLSR, in altre Batman, in altre ancora entrambi. Consultate la vostra comunità locale per sapere quale protocollo utilizzare.
 
 ### **Firewalling** {#firewalling}
 
@@ -568,11 +636,90 @@ Infine colleghiamoci al nostro ground router e andiamo nella sezione **Status \>
 
 ## **OpenWrt (CLI/UCI)** {#openwrt-(cli/uci)}
 
-TODO
+Questa sezione descrive come configurare il ground router interamente da linea di comando via **SSH**, usando i comandi **UCI** (Unified Configuration Interface) di OpenWrt. È l'equivalente di quanto descritto nella sezione LuCI, ma senza interfaccia grafica. Utile per chi preferisce la CLI o per automatizzare la configurazione.
 
-## 
+Tutti i comandi vanno eseguiti come root via SSH sul ground router.
 
-## 
+### **Configurazione VLAN con DSA**
+
+\#\# abilitare VLAN filtering sul bridge
+\#: uci set network.br_lan.vlan_filtering='1'
+
+\#\# VLAN 3 — traffico wireless antenna 1 (tagged su lan3)
+\#: uci add network bridge-vlan
+\#: uci set network.@bridge-vlan[-1].device='br-lan'
+\#: uci set network.@bridge-vlan[-1].vlan='3'
+\#: uci add_list network.@bridge-vlan[-1].ports='lan3:t'
+
+\#\# VLAN 4 — traffico wireless antenna 2 (tagged su lan4)
+\#: uci add network bridge-vlan
+\#: uci set network.@bridge-vlan[-1].device='br-lan'
+\#: uci set network.@bridge-vlan[-1].vlan='4'
+\#: uci add_list network.@bridge-vlan[-1].ports='lan4:t'
+
+\#\# VLAN 7 — gestione (tagged su lan3 e lan4, untagged+PVID su lan1 e lan2)
+\#: uci add network bridge-vlan
+\#: uci set network.@bridge-vlan[-1].device='br-lan'
+\#: uci set network.@bridge-vlan[-1].vlan='7'
+\#: uci add_list network.@bridge-vlan[-1].ports='lan1:u*'
+\#: uci add_list network.@bridge-vlan[-1].ports='lan2:u*'
+\#: uci add_list network.@bridge-vlan[-1].ports='lan3:t'
+\#: uci add_list network.@bridge-vlan[-1].ports='lan4:t'
+
+### **Creazione dispositivi VLAN e interfacce**
+
+\#\# dispositivo VLAN per la LAN di gestione
+\#: uci set network.lan.device='br-lan.7'
+
+\#\# interfaccia per antenna 1
+\#: uci set network.antenna1=interface
+\#: uci set network.antenna1.proto='static'
+\#: uci set network.antenna1.device='br-lan.3'
+\#: uci set network.antenna1.ipaddr='172.X.Y.Z'
+\#: uci set network.antenna1.netmask='255.255.0.0'
+
+\#\# interfaccia per antenna 2
+\#: uci set network.antenna2=interface
+\#: uci set network.antenna2.proto='static'
+\#: uci set network.antenna2.device='br-lan.4'
+\#: uci set network.antenna2.ipaddr='172.X.Y.W'
+\#: uci set network.antenna2.netmask='255.255.0.0'
+
+### **Configurazione LAN Ninux**
+
+\#\# impostare gli indirizzi sulla LAN
+\#: uci set network.lan.ipaddr='10.X.Y.1'
+\#: uci set network.lan.netmask='255.255.255.0'
+
+### **Firewall — zona Ninux**
+
+\#\# creare zona firewall Ninux
+\#: uci add firewall zone
+\#: uci set firewall.@zone[-1].name='ninux'
+\#: uci set firewall.@zone[-1].input='ACCEPT'
+\#: uci set firewall.@zone[-1].output='ACCEPT'
+\#: uci set firewall.@zone[-1].forward='ACCEPT'
+\#: uci add_list firewall.@zone[-1].network='antenna1'
+\#: uci add_list firewall.@zone[-1].network='antenna2'
+
+\#\# consentire forwarding tra LAN e Ninux
+\#: uci add firewall forwarding
+\#: uci set firewall.@forwarding[-1].src='lan'
+\#: uci set firewall.@forwarding[-1].dest='ninux'
+
+\#: uci add firewall forwarding
+\#: uci set firewall.@forwarding[-1].src='ninux'
+\#: uci set firewall.@forwarding[-1].dest='lan'
+
+### **Applicare e salvare**
+
+\#\# applicare tutte le modifiche
+\#: uci commit network
+\#: uci commit firewall
+\#: service network restart
+\#: service firewall restart
+
+Per la configurazione di OLSR o Batman via UCI, fate riferimento alle rispettive sezioni in questa guida.
 
 ## **Linux Box** {#linux-box}
 

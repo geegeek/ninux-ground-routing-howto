@@ -47,9 +47,9 @@ Legenda priorità:
 - [ ] 🟡 Aggiornare screenshot (quelli attuali sono vuoti/rotti)
 - [x] 🟡 Aggiungere opzione WebFig come alternativa a Winbox per utenti Linux
 
-## Sezione 8: Configurazione Radio — OpenWRT
-- [ ] 🆕 **Sezione ancora `TODO`** — scrivere ex novo per OpenWrt 23.05+
-- [ ] 🟡 Sottosezione Adhoc/Client Mode: trelay è ancora lo strumento corretto? Verificare alternative
+## Sezione 8: Configurazione Radio — OpenWrt
+- [x] 🆕 **Sezione ancora `TODO`** — scrivere ex novo per OpenWrt 23.05+
+- [x] 🟡 Sottosezione Adhoc/Client Mode: trelay è ancora lo strumento corretto? Verificare alternative
 
 ## Sezione 9: Ground Router — OpenWRT (LuCI)
 - [x] 🔴 **CAMBIAMENTO CRITICO: swconfig → DSA** (Distributed Switch Architecture) da OpenWrt 21.02+
@@ -66,10 +66,10 @@ Legenda priorità:
 - [x] 🟡 Sezione "Creazione Network OpenWRT": verificare se la procedura è sostanzialmente invariata con DSA
 - [x] 🟡 Sezione "Routing: OLSR": pacchetti olsrd sono ancora nei feed OpenWrt? Verificare
 - [x] 🟡 Sezione "Firewalling": fw3 → fw4 (nftables) da OpenWrt 22.03+
-- [ ] 🆕 Sezione "Routing: Batman" — ancora `TODO`, scrivere almeno una guida base
+- [x] 🆕 Sezione "Routing: Batman" — ancora `TODO`, scrivere almeno una guida base
 
-## Sezione 10: Ground Router — OpenWRT (CLI/UCI)
-- [ ] 🆕 **Sezione ancora `TODO`** — scrivere ex novo con comandi UCI per DSA
+## Sezione 10: Ground Router — OpenWrt (CLI/UCI)
+- [x] 🆕 **Sezione ancora `TODO`** — scrivere ex novo con comandi UCI per DSA
 
 ## Sezione 11: Ground Router — Linux Box
 - [x] 🔴 **`brctl` è deprecato** — sostituire con `ip link add type bridge` / `bridge vlan`
