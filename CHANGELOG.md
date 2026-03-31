@@ -10,6 +10,13 @@ Il formato è basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 - **Sezione AirOS (Ubiquiti)**: sostituiti tutti i comandi `ifconfig` con `ip link set` / `ip addr add` / `ip addr flush`; sostituito `vconfig add` con `ip link add ... type vlan id`.
 - **Sezione OpenWRT LuCI — Preparazione**: sostituiti `ifconfig eth0 up` e `ifconfig eth0 up 192.168.1.2/24` con `ip link set eth0 up` e `ip addr add 192.168.1.2/24 dev eth0`.
 - **Sezione Linux Box**: sostituito `brctrl addbr` / `brctrl addif` (che era anche un errore di battitura rispetto a `brctl`) con `ip link add name brX type bridge` / `ip link set ethX master brX`.
+- **Sezione OpenWrt (LuCI) — Cosa c'è da sapere sugli switch**: riscritta completamente per DSA (Distributed Switch Architecture). Vecchio contenuto swconfig preservato in box "Nota storica".
+- **Sezione OpenWrt (LuCI) — Dispositivi consigliati**: nuova tabella hardware 2026 con dispositivi DSA-compatibili (GL.iNet GL-MT6000, Xiaomi AX3000T, BananaPi BPI-R3/R4, ecc.). Vecchia tabella spostata in nota storica.
+- **Sezione OpenWrt (LuCI) — Analisi dello switch**: unificate le due sottosezioni (presenza VLAN default + numerazione logica/fisica) in un'unica sezione "Analisi delle interfacce di rete" aggiornata per DSA.
+- **Sezione OpenWrt (LuCI) — Creazione delle VLAN**: riscritta completamente per bridge VLAN filtering (DSA) in sostituzione della vecchia procedura "Network > Switch" (swconfig).
+- **Sezione OpenWrt (LuCI) — Creazione Network**: aggiornato riferimento da `ethX.Y` a `br-lan.Y` per DSA.
+- **Sezione OpenWrt (LuCI) — OLSR**: rimosso riferimento obsoleto a Scooreggione e Barrier Breaker, aggiornato "modem ADSL" → "modem o ONT in fibra".
+- **Sezione OpenWrt (LuCI) — Firewalling**: aggiunta nota su fw4/nftables (da OpenWrt 22.03+).
 
 ### Da fare
 - Vedere `TODO.md` per la roadmap completa degli aggiornamenti
