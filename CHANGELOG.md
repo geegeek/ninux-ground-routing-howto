@@ -17,6 +17,9 @@ Il formato è basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 - **Sezione Policy Routing**: aggiunta nota su nftables come alternativa, nota su `/etc/rc.local` e systemd.
 - **Sezione Scripts EdgeOS**: aggiunto box "sezione legacy", nota su wget → curl.
 - **Sezione Troubleshooting**: aggiunte nuove sottosezioni per problemi comuni DSA e RouterOS v7 bridge VLAN filtering; aggiunta nota su editor vi/nano in OpenWrt.
+- **Sezione OpenWrt Radio**: scritta ex novo — configurazione VLAN/bridge su antenna con OpenWrt (LuCI e UCI), aggiornata sottosezione Adhoc/Client Mode (`trelay` → `relayd`).
+- **Sezione Routing: Batman**: scritta ex novo — guida base a batman-adv su OpenWrt (installazione, configurazione LuCI e UCI, verifica con `batctl`).
+- **Sezione OpenWrt (CLI/UCI)**: scritta ex novo — configurazione completa del ground router via comandi UCI per DSA (VLAN, interfacce, LAN, firewall).
 - **Sezione FAQ**: scritta ex novo con 6 domande/risposte basate su problemi comuni reali.
 - **Sezione Riferimenti**: compilata ex novo con link a documentazione OpenWrt DSA, MikroTik v7, OLSR, Batman, Ninux wiki, IEEE 802.1Q, iproute2.
 - **Sezione Requisiti**: aggiornato il testo che menzionava il pacchetto `vlan` e l'utility `vconfig`; ora spiega che `iproute2` è già presente di default su tutte le distro moderne e sostituisce sia `vconfig` che `ifconfig` (pacchetto `net-tools`, anch'esso deprecato).
