@@ -6,6 +6,11 @@ Il formato è basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 ## [Unreleased]
 
 ### Modificato
+- **Prefazione**: aggiunto box "Revisione 2026" per indicare che si tratta di un aggiornamento della guida originale 2014-2016.
+- **Introduzione**: storicizzati i riferimenti a Sburratone e Scooreggione in un box "Contesto storico"; aggiunto paragrafo che elenca le versioni correnti dei sistemi trattati.
+- **Principi di funzionamento**: corretto "801.2Q" → "802.1Q" nella didascalia dell'immagine.
+- **Requisiti**: aggiornate specifiche minime hardware 2026 (128 MB RAM, 16 MB flash, DSA); modernizzato riferimento LiveCD → USB; aggiunta alternativa `nmcli` per chi preferisce tenere NetworkManager attivo; aggiornata nota su USB-to-Ethernet.
+- **Globale**: rebranding "OpenWRT" → "OpenWrt" (minuscola dalla 18.06 in poi) in tutto il documento.
 - **Sezione Requisiti**: aggiornato il testo che menzionava il pacchetto `vlan` e l'utility `vconfig`; ora spiega che `iproute2` è già presente di default su tutte le distro moderne e sostituisce sia `vconfig` che `ifconfig` (pacchetto `net-tools`, anch'esso deprecato).
 - **Sezione AirOS (Ubiquiti)**: sostituiti tutti i comandi `ifconfig` con `ip link set` / `ip addr add` / `ip addr flush`; sostituito `vconfig add` con `ip link add ... type vlan id`. Aggiunta nota su AirOS v8.x (airMAX AC) e airMAX 60GHz.
 - **Sezione RouterOS (MikroTik)**: riscritta per RouterOS v7 — rimosso "Master Port" (non più esistente), introdotto bridge VLAN filtering a 5 passi. Aggiornato link download Winbox (3.x stabile). Aggiunta WebFig come alternativa per utenti Linux. Vecchia procedura v6 preservata in box "Nota storica".
