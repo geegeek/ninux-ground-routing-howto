@@ -93,26 +93,26 @@ Legenda priorità:
 - [x] 🆕 Considerare aggiunta OPNsense come alternativa (fork attivo, più aggiornato)
 
 ## Sezione 14: Policy Routing
-- [ ] 🟡 I concetti e la logica delle tabelle sono ancora validi
-- [ ] 🟡 Verificare che i comandi `ip rule` / `ip route` funzionino identicamente su kernel recenti
-- [ ] 🟢 Aggiungere nota su `nft` come possibile alternativa per policy routing avanzato
+- [x] 🟡 I concetti e la logica delle tabelle sono ancora validi
+- [x] 🟡 Verificare che i comandi `ip rule` / `ip route` funzionino identicamente su kernel recenti
+- [x] 🟢 Aggiungere nota su `nft` come possibile alternativa per policy routing avanzato
 
 ## Sezione 15: Configurazione Scripts EdgeOS
-- [ ] 🟡 Legata alla sezione EdgeOS — stessa valutazione legacy
-- [ ] 🟢 Se mantenuta, aggiornare gli script (wget → curl, binari MIPS64)
+- [x] 🟡 Legata alla sezione EdgeOS — stessa valutazione legacy
+- [x] 🟢 Se mantenuta, aggiornare gli script (wget → curl, binari MIPS64)
 
 ## Sezione 16: Troubleshooting
-- [ ] 🟢 Lo script cron olsrd-check è valido concettualmente
-- [ ] 🟡 Per OpenWrt: `vi` → `nano` se disponibile, oppure nota sull'uso di vi
+- [x] 🟢 Lo script cron olsrd-check è valido concettualmente
+- [x] 🟡 Per OpenWrt: `vi` → `nano` se disponibile, oppure nota sull'uso di vi
 - [ ] 🟡 Per pfSense: aggiornare percorsi e riferimenti versione
-- [ ] 🆕 Aggiungere troubleshooting per DSA (problemi comuni nella migrazione)
-- [ ] 🆕 Aggiungere troubleshooting per RouterOS v7 bridge VLAN filtering
+- [x] 🆕 Aggiungere troubleshooting per DSA (problemi comuni nella migrazione)
+- [x] 🆕 Aggiungere troubleshooting per RouterOS v7 bridge VLAN filtering
 
 ## Sezione 17: FAQ
-- [ ] 🆕 **Sezione ancora `TODO`** — scrivere FAQ basate su problemi comuni reali
+- [x] 🆕 **Sezione ancora `TODO`** — scrivere FAQ basate su problemi comuni reali
 
 ## Sezione 18: Riferimenti
-- [ ] 🆕 **Sezione ancora `TODO`** — compilare con link attuali a documentazione OpenWrt DSA, MikroTik v7, OLSR, Batman, etc.
+- [x] 🆕 **Sezione ancora `TODO`** — compilare con link attuali a documentazione OpenWrt DSA, MikroTik v7, OLSR, Batman, etc.
 
 ---
 
