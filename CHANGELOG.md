@@ -6,6 +6,9 @@ Il formato è basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 ## [Unreleased]
 
 ### Modificato
+- **Principi di funzionamento — Bridge**: scritto box "Approfondimento tecnico — Bridge" al posto del `[TODO]`, con spiegazione di FDB, forwarding, flooding, STP e comandi iproute2.
+- **Principi di funzionamento — VLAN**: scritto box "Approfondimento tecnico — VLAN e 802.1Q" al posto del `[TODO]`, con tabella campi header 802.1Q (TPID, PCP, DEI, VID), nota su MTU 1522 byte, e spiegazione tagged/untagged/PVID.
+- **Link esterni**: aggiornato link FreeBSD Handbook cron (vecchio URL → `docs.freebsd.org`); sostituito link morto `debian-administration.org` con riferimento a `man 5 crontab` e wiki Arch Linux.
 - **Prefazione**: aggiunto box "Revisione 2026" per indicare che si tratta di un aggiornamento della guida originale 2014-2016.
 - **Introduzione**: storicizzati i riferimenti a Sburratone e Scooreggione in un box "Contesto storico"; aggiunto paragrafo che elenca le versioni correnti dei sistemi trattati.
 - **Principi di funzionamento**: corretto "801.2Q" → "802.1Q" nella didascalia dell'immagine.

@@ -88,7 +88,14 @@ I due “standard di rete” che consentono di attuare questi meccanismi fondame
 Un bridge è un’interfaccia logica (ovvero che non ha una corrispondente “porta” o “interfaccia” fisica) che raggruppa due o più interfacce di rete e che poi si occupa di inoltrare il traffico in ingresso verso quella che rappresenta la corretta destinazione. È del tutto simile a quello che fa uno switch Ethernet, che è un unico blocco che mette in comunicazione più porte ethernet fisiche come se fossero collegate tutte direttamente tra di loro. La differenza è che un bridge è un’interfaccia logica, e pertanto può fare lo stesso lavoro di mettere in comunicazione “tutti con tutti” anche quando ha a che fare con “mezzi fisici” completamente diversi, come porte ethernet, segnali wireless, cavi in fibra, ecc.   
 Sarà proprio il bridging tra wireless e cavo che imposteremo sull’antenna a replicare “senza pensarci” il traffico da e verso il router a terra. Di fatto, è come se l’antenna *non esistesse neppure* e il nostro router di terra fosse connesso direttamente al nodo al quale ci collegheremo (nodo remoto) con un luuuuuuuuunghissimo cavo virtuale.
 
-\[TODO\]*inserimento di un box con una spiegazione più tecnica*\[/TODO\]
+> **Approfondimento tecnico — Bridge**
+>
+> Un bridge opera al **livello 2 (Data Link)** del modello OSI. Internamente mantiene una tabella di inoltro (*forwarding database*, FDB) che associa gli indirizzi MAC di origine ai segmenti (porte) su cui sono stati visti. Quando un frame arriva su una porta del bridge, il bridge consulta la FDB per decidere su quale porta inoltrarlo:
+>
+> * **Destinazione nota** → il frame viene inoltrato solo sulla porta corretta (*unicast forwarding*).
+> * **Destinazione sconosciuta o broadcast** → il frame viene replicato su tutte le altre porte del bridge (*flooding*).
+>
+> Nei kernel Linux moderni il bridge è implementato nel modulo `bridge` (netfilter hook `br_netfilter`). Si crea con `ip link add name br0 type bridge` e si aggiungono porte con `ip link set ethX master br0`. Il bridge può anche partecipare allo Spanning Tree Protocol (STP, IEEE 802.1D) per evitare loop in topologie ridondanti, ma nel nostro caso — un solo cavo tra antenna e router — STP non è necessario.
 
 ## **VLAN** {#vlan}
 
@@ -106,7 +113,20 @@ Rimane solo una cosa da dire: se una porta fa parte di più VLAN significa che p
 Per poter comprendere questo tag e distinguere le VLAN è necessario che l’hardware e il software (router, switch, ma anche i dispositivi finali) supportino lo standard **802.1q** e siano dunque *VLAN-aware*. Questo tuttavia non significa che dispositivi che non supportano e/o non sono in grado di configurare le VLAN non possano far parte di una VLAN e dunque comunicare con le altre porte che la compongono. È infatti possibile impostare, in **una** VLAN, una porta come **untagged** (non taggata). Quello che succederà è che quando sarà necessario inoltrare il traffico taggato in arrivo dalle altre porte della VLAN verso il dispositivo finale collegato ad una porta non taggata, sarà premura dello switch rimuovere prima il tag e trasformare il traffico in normale traffico Ethernet, di modo che possa essere elaborato dal dispositivo finale.  
 Perchè una porta può essere impostata untagged solo in **una** della VLAN di cui fa parte? Per capire, supponiamo per un attimo che una porta sia untagged in due VLAN diverse, composte da porte completamente diverse, con solo la suddetta porta untagged in comune. Lo switch riceve in ingresso del traffico non taggato su questa porta comune. Come farebbe lo switch, senza nessun tag, a stabilire se quel traffico è destinato alle porte di una o dell’altra VLAN? Non potrebbe. Se invece questo limite è rispettato, lo switch non ha problemi perché ha un’unica scelta possibile e dunque inoltrerà (applicando prima il tag) verso le altre porte della VLAN.
 
-\[TODO\]*inserimento di un box con una spiegazione più tecnica*\[/TODO\]
+> **Approfondimento tecnico — VLAN e 802.1Q**
+>
+> Lo standard **IEEE 802.1Q** definisce il meccanismo di tagging VLAN. Concretamente, viene inserito un campo di 4 byte nell'header Ethernet, subito dopo il MAC sorgente:
+>
+> | Campo | Bit | Descrizione |
+> |---|---|---|
+> | TPID (Tag Protocol Identifier) | 16 | Valore fisso `0x8100`, identifica il frame come 802.1Q |
+> | PCP (Priority Code Point) | 3 | Priorità del frame (usato per QoS / CoS) |
+> | DEI (Drop Eligible Indicator) | 1 | Indica se il frame può essere scartato in caso di congestione |
+> | VID (VLAN Identifier) | 12 | Numero della VLAN, da 0 a 4095 (0 e 4095 riservati, utilizzabili da 1 a 4094) |
+>
+> L'inserimento del tag aumenta la dimensione del frame Ethernet da 1518 a **1522 byte**. Questo va tenuto presente se si configurano MTU personalizzati.
+>
+> In pratica: quando una porta è impostata come **tagged** (trunk), i frame che la attraversano mantengono il tag 802.1Q, permettendo allo switch/bridge di distinguere le VLAN. Quando è **untagged** (access), il tag viene rimosso in uscita e aggiunto in ingresso (con il VID della VLAN nativa assegnata a quella porta, detto **PVID** — Port VLAN ID).
 
 # **Vantaggi del routing a terra** {#vantaggi-del-routing-a-terra}
 
@@ -1231,8 +1251,8 @@ chmod \+x /usr/sbin/olsrd-check
 a questo punto bisogna eseguire lo script in automatico come operazione pianificata (scheduled)
 
 il modo più semplice é aggiungendo un'operazione alla tabella di **cron.**  
-(fare riferimento al manuale di cron per ulteriori informazioni:  
-http://www.freebsd.org/doc/en/books/handbook/configtuning-cron.html)
+(fare riferimento al manuale di cron per ulteriori informazioni:
+https://docs.freebsd.org/en/books/handbook/config/#configtuning-cron)
 
 Cron é un servizio che permette di fare operazioni pianificate scritte in un file con apposita formattazione. Nello specifico aggiungere la seguente riga al file **/etc/crontab:**
 
@@ -1529,7 +1549,7 @@ aggiungere la riga:
 poi \[submit\]  
    
 Cron é un servizio che permette di fare operazioni pianificate scritte in un file con apposita formattazione, in questo modo cron eseguirà lo script una volta al minuto e se necessario riavvierà OLSRD.  
-([https://www.debian-administration.org/article/56/Command\_scheduling\_with\_cron](https://www.debian-administration.org/article/56/Command_scheduling_with_cron))
+(per approfondimenti su cron: `man 5 crontab` oppure consultare la [pagina Cron sulla wiki di Arch Linux](https://wiki.archlinux.org/title/Cron))
 
 # **FAQ** {#faq}
 
