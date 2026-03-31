@@ -153,6 +153,8 @@ Per consentire la gestione interna dell’antenna (ovvero l’accesso alla sua i
 
 ## **AirOS (Ubiquiti)** {#airos-(ubiquiti)}
 
+> **Nota sulla versione**: la procedura qui descritta si riferisce ad **AirOS v5.x / v6.x**, diffusa sugli apparati della serie airMAX M (NanoStation M5, Rocket M5, PowerBeam M5, ecc.). Sugli apparati **airMAX AC** (Rocket 5AC, PowerBeam 5AC, LiteBeam AC, ecc.) il firmware è **AirOS v8.x**: l'interfaccia web è stata ridisegnata ma i concetti di VLAN e bridge restano gli stessi — le voci di menu potrebbero trovarsi in posizioni leggermente diverse. Per i dispositivi **airMAX 60GHz** (GigaBeam, ecc.) il firmware è completamente diverso e questa procedura non si applica.
+
 Apriamo un terminale di root e diamo un indirizzo alla nostra scheda di rete:
 
 \#\# attivazione interfaccia
@@ -212,75 +214,94 @@ e ricominciare dall’inizio se abbiamo una seconda antenna. Se questa era la no
 
 ## **RouterOS (Mikrotik)** {#routeros-(mikrotik)}
 
-### **Connessione all’apparato** {#connessione-all’apparato}
+> **Nota sulla versione**: questa sezione è stata aggiornata per **RouterOS v7.x**, che ha introdotto cambiamenti radicali nella gestione delle VLAN e dei bridge rispetto alla v6.x. In particolare, il concetto di **Master Port è stato rimosso**: tutte le porte Ethernet sono ora membri di un bridge e le VLAN vengono gestite tramite **bridge VLAN filtering**. Se state usando RouterOS v6.x, consultate la nota storica in fondo a questa sezione.
 
-Per prima cosa, scarichiamo **winbox** dal sito ufficiale mikrotik ([da qui](http://download2.mikrotik.com/routeros/winbox/3.0beta3/winbox.exe)) .  
-Winbox è l'utility per la programmazione delle radio mikrotik. E' possibile anche utilizzare l’interfaccia web ma coprirò esclusivamente la procedura via winbox, in quanto i modelli più vecchi delle routerboard erano accessibili solo tramite questa utility oppure via riga di comando.  
-Winbox è un eseguibile per windows, perciò se utilizziamo linux, è possibile eseguire l’applicazione tramite wine.
+### **Connessione all'apparato** {#connessione-all'apparato}
 
-Colleghiamo la radio al pc via cavo e disabilitiamo la scheda wireless (se presente) del pc. Ora lanciamo winbox e premiamo il pulsante **"..."** a fianco di **connect**.
+Per prima cosa, scarichiamo **Winbox** dal sito ufficiale MikroTik ([pagina download](https://mikrotik.com/download)). La versione attuale è la **Winbox 3.x** (stabile, non più beta).
+Winbox è l'utility per la programmazione delle radio MikroTik. È disponibile anche un'**interfaccia web chiamata WebFig**, accessibile direttamente dal browser all'indirizzo IP dell'apparato, che è un'alternativa valida soprattutto per chi usa Linux senza dover ricorrere a Wine.
+Winbox è un eseguibile per Windows; se utilizziamo Linux, è possibile eseguirlo tramite **Wine** oppure usare direttamente WebFig.
 
-L'utility farà una ricerca delle radio collegate ignorando l'ip su cui esse si trovano.  
-Una volta comparsa la radio nella lista, clicchiamo sul **mac address**, poi **connect** (eventualmente inseriamo username e password se esse sono state configurate, altrimenti lasciamo "admin" e "vuoto").  
-Accedere alla radio tramite mac ci evita di dover riconfigurare l'indirizzo ip del pc.
+Colleghiamo la radio al PC via cavo e disabilitiamo la scheda wireless (se presente) del PC. Ora lanciamo Winbox e premiamo il pulsante **"..."** a fianco di **Connect**.
+
+L'utility farà una ricerca delle radio collegate ignorando l'IP su cui esse si trovano.
+Una volta comparsa la radio nella lista, clicchiamo sul **MAC address**, poi **Connect** (eventualmente inseriamo username e password se esse sono state configurate, altrimenti lasciamo "admin" e "vuoto").
+Accedere alla radio tramite MAC ci evita di dover riconfigurare l'indirizzo IP del PC.
 
 ![1.png][image4]
 
 ### **Configurazione ip, vlan e bridge**  {#configurazione-ip,-vlan-e-bridge}
 
-Iniziamo.  
-Dalla barra a sinistra, andiamo in **bridge** ed eliminiamo (con il **“-”** rosso nella barra superiore) il bridge di default, che è quello che collega **wireless** e **lan**.  
-E' probabile che durante la procedura l' applicazione ci scolleghi dall'antenna ma è sufficiente ricollegarsi con il metodo precedente.  
-Ora ritorniamo in **bridge \> ports** ed eliminiamo (con il tasto **“-”** rosso nella barra superiore )le porte associate al bridge eliminato in precedenza.
+Iniziamo.
 
-Ora andiamo in **interfaces**.  
-Se la nostra radio ha una sola porta ethernet, passate al prossimo punto, altrimenti eseguiamo "l'isolamento delle porte"  
-Doppio click sul nome della porta ethernet e in  **Master port** scegliamo **none**, poi **ok** per confermare.  
-Rieseguiamo questa procedura per ogni porta.  
-![2.png][image5]
+**Passo 1: Preparazione del bridge**
 
-Riprendiamo da qui se abbiamo solo una porta ethernet.  
-Clicchiamo dalla schermata **interfaces** su **"+"** poi **vlan** e infine nella finestra che comparirà compiliamo i dati della vlan.  
-Dovremo eseguire questa procedura due volte specificando i seguenti parametri per rispettivamente la prima e la seconda volta:
+In RouterOS v7, tutte le porte Ethernet sono normalmente già membri di un bridge di default. Dalla barra a sinistra, andiamo in **Bridge** e verifichiamo che esista un bridge (tipicamente chiamato **bridge1** o **bridge**). Se non esiste, creiamone uno cliccando su **"+"**.
 
-1. **vlan id** \=X, dove X è l'id della vlan di "traffico wireless"  
-   **interface**\= nome dell'interfaccia su cui collegheremo il cavo  
-   **nome**: consiglio un nome esplicativo e che contega il vlan id scelto per avere subito a colpo d'occhio lo scopo di questa interfaccia (ad esempio "vlan3 traffico wireless")  
-2. **vlan id**\=Y, dove Y (diverso da X) è l'id della vlan di "gestione radio"  
-   **interface**\= nome dell'interfaccia su cui collegheremo il cavo (che deve coincidere con quella selezionata per la vlan precedente)  
-   **nome**: come sopra.
+Andiamo nel tab **Ports** del bridge e verifichiamo quali porte ne fanno parte. Per il routing a terra, le porte Ethernet che collegheremo alle antenne devono far parte del bridge. Se la nostra radio ha una sola porta Ethernet, questa dovrebbe già essere nel bridge.
 
-     
-L'accortezza da usare per questi due passaggi è quella di scegliere degli id opportuni: evitiamo 1 e 2 in quanto comuni in openwrt e iniziamo dal 3 in poi, avendo cura di **NON riutilizzare** lo stesso vlan id per il traffico wireless anche su eventuali altre radio (mikrotik e non) e invece di **riutilizzare** lo stesso vlan id di "gestione radio" anche per eventuali altre radio (mikrotik e non).
+**Passo 2: Creazione delle VLAN**
 
-Ad esempio, utilizziamo 3,4,5,6 per 4 radio diverse nel campo "vlan id di traffico wireless" ma sempre 9 (oppure 10, ma anche 8 o 11\) per il campo "vlan id di gestione radio".
+Andiamo in **Interfaces**, clicchiamo su **"+"** e poi su **VLAN**. Nella finestra che comparirà compiliamo i dati della VLAN.
+Dovremo eseguire questa procedura due volte specificando i seguenti parametri:
 
-Memorizziamoci inoltre questi id perchè poi ci serviranno per configurare il router per il ground routing.
+1. **VLAN ID** = X, dove X è l'ID della VLAN di "traffico wireless"
+   **Interface** = nome del bridge (ad es. bridge1)
+   **Name**: consiglio un nome esplicativo che contenga il VLAN ID scelto (ad esempio "vlan3-traffico-wireless")
+2. **VLAN ID** = Y, dove Y (diverso da X) è l'ID della VLAN di "gestione radio"
+   **Interface** = nome del bridge (lo stesso di prima)
+   **Name**: come sopra (ad esempio "vlan7-gestione")
+
+L'accortezza da usare per questi due passaggi è quella di scegliere degli ID opportuni: evitiamo 1 e 2 in quanto comuni in OpenWrt e iniziamo dal 3 in poi, avendo cura di **NON riutilizzare** lo stesso VLAN ID per il traffico wireless anche su eventuali altre radio (MikroTik e non) e invece di **riutilizzare** lo stesso VLAN ID di "gestione radio" anche per eventuali altre radio.
+
+Ad esempio, utilizziamo 3, 4, 5, 6 per 4 radio diverse nel campo "VLAN ID di traffico wireless" ma sempre 7 (o altro ID scelto) per il campo "VLAN ID di gestione radio".
+
+Memorizziamoci inoltre questi ID perché poi ci serviranno per configurare il router per il ground routing.
 
 ![3.png][image6]
 
-Al termine della procedura dovremmo  avere qualcosa del genere:![4.png][image7]
+**Passo 3: Configurazione bridge VLAN filtering**
 
-Ora creiamo un bridge tra la "vlan di traffico wireless" e l'interfaccia wireless.  
-Andiamo in **bridge** , clicchiamo su **"+"** e scegliamo un nome per il bridge. Confermiamo con **ok**.  
-![5.png][image8]
+Questo è il passo fondamentale che sostituisce il vecchio "Master Port" della v6. Andiamo in **Bridge > VLANs** e aggiungiamo le VLAN al bridge:
 
-Spostiamoci nel tab **ports** e clicchiamo su **"+"**  
-Scegliamo dal campo **interface** l'interfaccia di **vlan traffico wireless** e come bridge, il nome del bridge creato al punto precedente.  
-Ripetiamo la procedura scegliendo questa volta l'interfaccia wifi (probabilmente si chiama wlan1) e come bridge, il nome del bridge come al punto sopra. ![6.png][image9]
+* Clicchiamo su **"+"** e configuriamo:
+  * **Bridge**: bridge1
+  * **VLAN IDs**: X (il VLAN ID di traffico wireless)
+  * **Tagged**: la porta Ethernet su cui collegheremo il cavo verso il ground router
+  * **Untagged**: lasciare vuoto
+* Ripetiamo per il VLAN ID Y (gestione):
+  * **Bridge**: bridge1
+  * **VLAN IDs**: Y
+  * **Tagged**: la stessa porta Ethernet
+  * **Untagged**: lasciare vuoto
 
-Otterremo qualcosa di questo tipo:  
-![7.png][image10]
+Ora abilitiamo il VLAN filtering sul bridge: andiamo in **Bridge**, doppio click sul bridge, e spuntiamo **VLAN Filtering = yes**.
 
-Ora non ci resta che gestire gli ip della radio.  
-Andiamo in **ip \> dhcp client** e rimuoviamo tutto quello che troviamo nel tab **dhcp client** (con **"-"** rosso")  
-Idem andando in **ip \> dhcp server**.  
-Ora in **ip \> addresses**  clicchiamo su **"+"** e nella schermata che comparirà inseriamo uno degli ip della nostra lan riservata comprensivo dello /CC finale (ad esempio 10.120.0.6/24). Prima di confermare selezioniamo l'interfaccia su cui dovrà essere attivato l'ip, che per noi è l'interfaccia vlan di gestione.  
-Clicchiamo su **ok** e poi eliminiamo qualsiasi altro ip presente nella schermata.  
+> **Attenzione**: abilitare il VLAN filtering prima di aver configurato correttamente le VLAN potrebbe farci perdere la connessione all'apparato. Assicuratevi di aver completato i passi precedenti prima di spuntare questa opzione.
+
+**Passo 4: Creazione del bridge tra VLAN di traffico wireless e interfaccia wireless**
+
+Andiamo in **Bridge > Ports** e clicchiamo su **"+"**.
+Scegliamo dal campo **Interface** l'interfaccia wireless (probabilmente si chiama **wlan1**) e come bridge, il nome del bridge.
+
+![6.png][image9]
+
+**Passo 5: Configurazione IP**
+
+Ora non ci resta che gestire gli IP della radio.
+Andiamo in **IP > DHCP Client** e rimuoviamo tutto quello che troviamo (con **"-"** rosso).
+Idem andando in **IP > DHCP Server**.
+Ora in **IP > Addresses** clicchiamo su **"+"** e nella schermata che comparirà inseriamo uno degli IP della nostra LAN riservata comprensivo dello /CC finale (ad esempio 10.120.0.6/24). Prima di confermare selezioniamo l'interfaccia su cui dovrà essere attivato l'IP, che per noi è l'**interfaccia VLAN di gestione** (ad es. vlan7-gestione).
+Clicchiamo su **OK** e poi eliminiamo qualsiasi altro IP presente nella schermata.
+
 ![11.png][image11]
 
-Fatto\!  
-Se abbiamo altri apparati ricominciamo dall’inizio per la loro configurazione, altrimenti si può proseguire con la configurazione del ground router.
+Fatto!
+Se abbiamo altri apparati ricominciamo dall'inizio per la loro configurazione, altrimenti si può proseguire con la configurazione del ground router.
+
+> **Nota storica (RouterOS v6.x)**
+>
+> Nella versione precedente di questa guida, la procedura prevedeva l'uso del **Master Port** per isolare le porte Ethernet dello switch interno. Questo meccanismo è stato completamente rimosso in RouterOS v7: al suo posto si utilizza il bridge con VLAN filtering, come descritto sopra. Se state ancora usando RouterOS v6.x, la vecchia procedura prevedeva: doppio click sulla porta Ethernet > impostare "Master Port" su "none" per ogni porta. Tuttavia, è fortemente consigliato aggiornare a RouterOS v7.x per beneficiare della gestione VLAN moderna e del supporto attivo da parte di MikroTik.
 
 ## **OpenWRT** {#openwrt}
 

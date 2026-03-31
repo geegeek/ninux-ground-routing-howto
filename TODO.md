@@ -34,18 +34,18 @@ Legenda priorità:
 - [ ] 🟢 Nota su USB-to-Ethernet: meno problematico nel 2026 con driver maturi
 
 ## Sezione 6: Configurazione Radio — AirOS (Ubiquiti)
-- [ ] 🔴 AirOS è cambiato significativamente (v8.x+). Verificare se la procedura VLAN/bridge è ancora identica
+- [x] 🔴 AirOS è cambiato significativamente (v8.x+). Verificare se la procedura VLAN/bridge è ancora identica
 - [x] 🔴 Sostituire comandi `ifconfig` e `vconfig` con equivalenti `ip`
-- [ ] 🟡 Aggiungere nota su Ubiquiti AirMax AC / airMAX 60GHz e relative differenze di interfaccia
+- [x] 🟡 Aggiungere nota su Ubiquiti AirMax AC / airMAX 60GHz e relative differenze di interfaccia
 - [ ] 🟡 Le immagini AirOS sono tutte vuote/rotte — servono nuovi screenshot
 - [ ] 🆕 Considerare aggiunta sezione per UISP / UniFi (se rilevanti per nodi Ninux)
 
 ## Sezione 7: Configurazione Radio — RouterOS (MikroTik)
-- [ ] 🔴 **"Master Port" è stato rimosso in RouterOS v7** — sostituire con bridge VLAN filtering
-- [ ] 🔴 Winbox 3.x è la versione corrente — aggiornare link download e procedura
-- [ ] 🔴 RouterOS v7 ha cambiato radicalmente la gestione VLAN (bridge vlan-filtering=yes)
+- [x] 🔴 **"Master Port" è stato rimosso in RouterOS v7** — sostituire con bridge VLAN filtering
+- [x] 🔴 Winbox 3.x è la versione corrente — aggiornare link download e procedura
+- [x] 🔴 RouterOS v7 ha cambiato radicalmente la gestione VLAN (bridge vlan-filtering=yes)
 - [ ] 🟡 Aggiornare screenshot (quelli attuali sono vuoti/rotti)
-- [ ] 🟡 Aggiungere opzione WebFig come alternativa a Winbox per utenti Linux
+- [x] 🟡 Aggiungere opzione WebFig come alternativa a Winbox per utenti Linux
 
 ## Sezione 8: Configurazione Radio — OpenWRT
 - [ ] 🆕 **Sezione ancora `TODO`** — scrivere ex novo per OpenWrt 23.05+

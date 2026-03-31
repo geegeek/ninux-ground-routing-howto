@@ -7,7 +7,8 @@ Il formato è basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 
 ### Modificato
 - **Sezione Requisiti**: aggiornato il testo che menzionava il pacchetto `vlan` e l'utility `vconfig`; ora spiega che `iproute2` è già presente di default su tutte le distro moderne e sostituisce sia `vconfig` che `ifconfig` (pacchetto `net-tools`, anch'esso deprecato).
-- **Sezione AirOS (Ubiquiti)**: sostituiti tutti i comandi `ifconfig` con `ip link set` / `ip addr add` / `ip addr flush`; sostituito `vconfig add` con `ip link add ... type vlan id`.
+- **Sezione AirOS (Ubiquiti)**: sostituiti tutti i comandi `ifconfig` con `ip link set` / `ip addr add` / `ip addr flush`; sostituito `vconfig add` con `ip link add ... type vlan id`. Aggiunta nota su AirOS v8.x (airMAX AC) e airMAX 60GHz.
+- **Sezione RouterOS (MikroTik)**: riscritta per RouterOS v7 — rimosso "Master Port" (non più esistente), introdotto bridge VLAN filtering a 5 passi. Aggiornato link download Winbox (3.x stabile). Aggiunta WebFig come alternativa per utenti Linux. Vecchia procedura v6 preservata in box "Nota storica".
 - **Sezione OpenWRT LuCI — Preparazione**: sostituiti `ifconfig eth0 up` e `ifconfig eth0 up 192.168.1.2/24` con `ip link set eth0 up` e `ip addr add 192.168.1.2/24 dev eth0`.
 - **Sezione Linux Box**: sostituito `brctrl addbr` / `brctrl addif` (che era anche un errore di battitura rispetto a `brctl`) con `ip link add name brX type bridge` / `ip link set ethX master brX`.
 - **Sezione OpenWrt (LuCI) — Cosa c'è da sapere sugli switch**: riscritta completamente per DSA (Distributed Switch Architecture). Vecchio contenuto swconfig preservato in box "Nota storica".
