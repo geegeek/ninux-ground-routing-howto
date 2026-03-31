@@ -605,11 +605,13 @@ ip link set eth1 master br0
 ip addr add 10.X.Y.Z/24 dev br0  
 ip link set dev br0 up
 
-Dopo di chè dovremo installare olsrd, dai repository di debian o usando un binario precompilato da qualcun’altro. 
+Dopodiché dovremo installare olsrd. Su distribuzioni Debian/Ubuntu moderne è disponibile nei repository:
 
-E’ possibile installare OLSRD dai repo, ma essendoci solitamente versioni vecchie di OLSRD è consigliato scaricare un binario già compilato o compilarlo in locale. 
+\#: apt update && apt install olsrd olsrd-plugins
 
-Una volta installato OLSDR dovemo andare ad editare il file /etc/olsrd/olsrd.conf per configurare il demone di routing:
+In alternativa è possibile compilarlo dai sorgenti. Il pacchetto dai repository è generalmente la scelta più comoda e sicura.
+
+Una volta installato olsrd, andiamo ad editare il file **/etc/olsrd/olsrd.conf** per configurare il demone di routing:
 
 Questo è uno scheletro del file di configurazione con solamente le istruzioni essenziali
 
@@ -676,11 +678,22 @@ Questo è uno scheletro del file di configurazione con solamente le istruzioni e
 *}*   
 Ogni direttiva particolare per questa interfaccia andrà aggiunta all’interno delle parentesi graffe. 
 
-A questo punto se abbiamo usato l’insallazione dai repo dobbiamo editare il file /etc/default/oslrd per avviare olsrd insieme al router, se invece abbiamo usato un binario di OLSRD di terze parti dovremo crearci uno script di init per avviarlo all’avvio. 
+A questo punto dobbiamo assicurarci che olsrd si avvii automaticamente. Se abbiamo usato il pacchetto dai repository, su sistemi con **systemd** (tutte le distro moderne) basta abilitare il servizio:
+
+\#: systemctl enable olsrd
+\#: systemctl start olsrd
+
+Su sistemi più vecchi con init SysV, editare il file `/etc/default/olsrd` e impostare `START_OLSRD="YES"`. Se invece abbiamo compilato olsrd manualmente, possiamo creare un file di servizio systemd personalizzato in `/etc/systemd/system/olsrd.service`.
 
 ## **EdgeOS (Ubiquiti EdgeRouter)** {#edgeos-(ubiquiti-edgerouter)}
 
-Per utilizzare la confgurazione di routing a terra con uno switch edgerouter è fortemente consigliato l’uso di uno switch addizionale, managed o non. Si consigliano i modelli Netgear gs105/8 \[Plus\] o EdgeSwitch POE.
+> **Attenzione: sezione legacy**
+>
+> **EdgeOS è sostanzialmente EOL** (End of Life): Ubiquiti non rilascia più aggiornamenti significativi per questa piattaforma e la linea EdgeRouter è stata de facto abbandonata in favore della gamma UniFi / UISP. La tabella di compatibilità EdgeOS/Debian riportata in questa sezione è ferma a Debian Wheezy (2013), ormai fuori supporto.
+>
+> Per chi utilizza ancora un EdgeRouter, è consigliabile valutare l’installazione di **OpenWrt** (molti modelli sono supportati) oppure la migrazione verso un ground router moderno. La sezione seguente è mantenuta come riferimento storico per chi ha ancora questa configurazione attiva.
+
+Per utilizzare la configurazione di routing a terra con uno switch EdgeRouter è fortemente consigliato l’uso di uno switch addizionale, managed o non. Si consigliano i modelli Netgear GS105/108 \[Plus\] o EdgeSwitch POE.
 
 Collegate le varie antenne allo switch, e una porta dello switch alla porta 1(eth0) del nostro edgerouter.  Dovremo configurare le vlan per le varie antenne. 
 
@@ -802,6 +815,14 @@ Se invece abbiamo usato un binario di OLSRD di terze parti dovremo crearci uno s
 Per la configurazione di OLSRD vedere la sezione relativa alla configurazione sotto EdgeOS (Ubiquiti EdgeRouter).
 
 ## **pfSense** {#pfsense}
+
+> **Attenzione: contenuto datato**
+>
+> Questa sezione fa riferimento a **pfSense 2.1.3** (FreeBSD 8.3) e **OLSRD 0.6.3**, entrambi ormai obsoleti. La versione corrente è **pfSense 2.7+** basata su **FreeBSD 14**, nella quale i percorsi dei file sono cambiati significativamente (ad esempio `/usr/pbi/` non esiste più). Inoltre la disponibilità di pacchetti OLSRD aggiornati per pfSense non è garantita.
+>
+> Come alternativa moderna a pfSense è consigliabile valutare **OPNsense**, un fork attivo e aggiornato con maggiore frequenza, che offre le stesse funzionalità di firewall e routing con un'interfaccia modernizzata.
+>
+> I concetti di networking esposti in questa sezione (VLAN, NAT, policy routing) restano validi, ma la procedura operativa andrà adattata alla versione di pfSense o OPNsense in uso.
 
 ### **Configurazione delle VLAN** {#configurazione-delle-vlan}
 
