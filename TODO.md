@@ -122,6 +122,6 @@ Legenda priorità:
 - [x] 🔴 **Sostituire TUTTI i `vconfig` con `ip link add type vlan`** in tutta la guida
 - [x] 🔴 **Sostituire TUTTI i `brctl` con `ip link add type bridge`** in tutta la guida
 - [ ] 🟡 **Rifare tutti gli screenshot** — quelli attuali sono tutti placeholder vuoti
-- [ ] 🟡 Uniformare la formattazione Markdown (attualmente inconsistente)
+- [x] 🟡 Uniformare la formattazione Markdown (attualmente inconsistente)
 - [x] 🟡 Verificare tutti i link esterni (molti saranno rotti)
 - [ ] 🟢 Aggiungere un diagramma di rete aggiornato (sostituire l'immagine vuota nella sezione Vantaggi)

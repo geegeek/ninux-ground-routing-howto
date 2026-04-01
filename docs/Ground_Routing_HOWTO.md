@@ -32,7 +32,7 @@
 [EdgeOS (Ubiquiti EdgeRouter)](#edgeos-\(ubiquiti-edgerouter\))  
 [pfSense](#pfsense)  
 [Configurazione delle VLAN](#configurazione-delle-vlan)  
-[Considerazioni premilinari su interfacce e indirizzi](#considerazioni-premilinari-su-interfacce-e-indirizzi)  
+[Considerazioni preliminari su interfacce e indirizzi](#considerazioni-premilinari-su-interfacce-e-indirizzi)  
 [Configurazione delle interfacce](#configurazione-delle-interfacce)  
 [Routing: OLSR](#routing:-olsr-1)  
 [Ricetta PfSense:  configurare il NAT in un router con internet (Supernodo con WAN)](#ricetta-pfsense:-configurare-il-nat-in-un-router-con-internet-\(supernodo-con-wan\))  
@@ -1011,9 +1011,9 @@ Le interfacce VLAN create appariranno nella lista con nomi del tipo `igb0.10`, `
 
 > **Consiglio**: usate VLAN ID che corrispondano ai vostri indirizzi per facilitare la gestione. Ad esempio, se l'antenna usa l'IP `172.21.1.1`, potete usare VLAN ID `10` o `11` per le prime antenne. I VLAN ID devono corrispondere a quelli configurati sull'antenna (AirOS) e sull'interfaccia switch/bridge intermedia.
 
-### **Considerazioni premilinari su interfacce e indirizzi** {#considerazioni-premilinari-su-interfacce-e-indirizzi}
+### **Considerazioni preliminari su interfacce e indirizzi** {#considerazioni-premilinari-su-interfacce-e-indirizzi}
 
-Qundo si configurano le interfacce “wireless” per le antenne bisogna tenere in considerazione quanto segue (si prende come esempio la subnet 172.21.x.x assegnata alle zona Marche, riferire gli esempi alla subnet di zona):
+Quando si configurano le interfacce “wireless” per le antenne bisogna tenere in considerazione quanto segue (si prende come esempio la subnet 172.21.x.x assegnata alle zona Marche, riferire gli esempi alla subnet di zona):
 
 ogni interfaccia ha un indirizzo ip del tipo 172.21.x.x	  
 ogni interfaccia deve essere parte di una sottorete diversa altrimenti pfSense crea un aggregato di rete con un'unica interfaccia come gateway per tutti gli ip della stessa sottorete. A differenza di altri router, pfSense non è in grado di gestire questa situazione (a meno di impostare regole specifiche) neanche quando il routing viene gestito da OLSR.  
@@ -1066,14 +1066,14 @@ informazioni riguardo il demone olsrd in pfSense 2.1.3 (FreeBSD 8.3.-p16):
 \*\*\* olsr.org \- 0.6.3-git\_-hash\_ \*\*\*  
 Build date: 2012-12-20 on packages-8\_3-i386.builders.pfsense.org
 
-installare il paccjetto olsrd da:  
+installare il pacchetto olsrd da:  
 system → packages → available packages
 
 start:  
 /usr/local/etc/rc.d/olsrd start
 
-status :  
-/usr/local/etc/rc.d/olsrd start
+status:  
+/usr/local/etc/rc.d/olsrd status
 
 Avviare il demone – operazioni preliminari
 
@@ -1512,18 +1512,19 @@ ip route add blackhole 192.168.0.0/16 table 114
 
 exit 0
 
-**Plugin**  
-TODO per compilazione e configurazione
+**Plugin OLSR per EdgeRouter**
 
-# **pfSense**
+> **Nota storica (Legacy — EdgeOS EOL)**: questa sezione riguarda la compilazione e configurazione dei plugin OLSRD su EdgeRouter (piattaforme MIPS64: EdgeRouter 3 Lite, 5 POE, 8, 8-pro, Infinity). EdgeOS è sostanzialmente abbandonato da Ubiquiti (nessun aggiornamento significativo dal 2022). I passaggi sotto sono conservati a titolo storico.
 
-**Compilazione OLSR per EdgeRouter (3 Lite, 5 POE, 8 , 8-pro, Infinity) piattaforma MIPS64**
+OLSRD supporta una serie di plugin che estendono le sue funzionalità. I tre più usati negli script Ninux per EdgeRouter erano:
 
-**Configurazione plugins OLSR**
+- **txtinfo**: espone via HTTP (porta 89 di default) informazioni testuali sulle tabelle di routing OLSR — vicini, route, HNA, MID. Utile per debug e monitoring. Consultare `http://127.0.0.1:89/` quando il plugin è attivo.
+- **mdns**: abilita il forwarding dei pacchetti mDNS (Multicast DNS, porta 5353) tra le interfacce OLSR, permettendo la scoperta di servizi locali tra nodi. Utile per ambienti mesh dove si vuole propagare risorse Bonjour/Avahi.
+- **jsoninfo**: versione moderna di txtinfo che espone le stesse informazioni in formato JSON (porta 9090 di default). Preferibile a txtinfo per integrazione con sistemi di monitoraggio.
 
-**txtinfo**  
-**mdns**  
-**jsoninfo**
+Per compilare OLSRD con i plugin su MIPS64 (cross-compilation da una macchina x86_64) era necessario il toolchain MIPS64 di EdgeOS, non più pubblicamente mantenuto. In alternativa, alcuni pacchetti precompilati erano disponibili su `http://test.ninux.org/~clauz/edgerouter/` (repository non più aggiornato).
+
+---
 
 # **Troubleshooting** {#troubleshooting}
 
