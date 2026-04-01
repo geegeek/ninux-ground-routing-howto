@@ -879,21 +879,25 @@ Per prima cosa eseguiamo il backup della configurazione del router; una volta ac
 
 Per prima cosa ci conviene cambiare utente di default del router in modo tale che soltanto noi possiamo accederci. I comandi da dare sono i seguenti per creare ad esempio un utente con la seguente login (pippo/paperino rispettivamente per username/password): 
 
-*configure*  
-*set system login user pippo authentication plaintext-password paperino*  
-	*commit*  
-	*save*  
-	*exit*  
-	*exit*
+```sh
+configure
+set system login user pippo authentication plaintext-password paperino
+commit
+save
+exit
+exit
+```
 
 Ora possiamo cancellare il vecchio account ubnt/ubnt e per farlo dobbiamo fare la login con il nuovo utente, nel nostro caso pippo/paperino e poi diamo i seguenti comandi :
 
-	*configure*  
-	*delete system login user ubnt*  
-	*commit*  
-	*save*  
-	*exit*  
-	*exit*
+```sh
+configure
+delete system login user ubnt
+commit
+save
+exit
+exit
+```
 
 A questo punto abbiamo sul nostro sistema esclusivamente l’utente che abbiamo precedentemente creato. Nel caso qualche operazione sia andata male e non riuscite ad andare avanti ma riuscite graficamente ad accedere alla voce System in basso a sinistra, potete ricaricare la configurazione originale che vi siete precedentemente salvati sul pc e ricaricarla sul router per ripristinare il tutto (spero che abbiate saltato il passaggio del backup e men che meno quello dell’immagine del sistema \!).
 
@@ -901,35 +905,41 @@ La configurazione finale del router sarà tale che su ogni porta sarà presente 
 Per configurare correttamente la porta eth1 è necessario sapere che subnet il router del nostro gestore internet annuncia; se ad esempio annuncia la 192.168.1.0/24 (generalmente annunciano sempre o la 192.168.1.0/24 oppure la 192.168.0.0/24), cioè assegna indirizzi ip dal 192.168.1.2 al 192.168.1.254 in quanto il 192.168.1.1 è lui stesso, possiamo senza problemi assegnare staticamente alla eth2 un indirizzo ad esempio 192.168.1.50, indirizzo che ovviamente non è utilizzato da nessun altro device della nostra rete.  
 Per poterlo configurare colleghiamo un cavo di rete sulla eth0, impostiamo la nostra scheda di rete con un indirizzo ip della subnet 192.168.1.0/24 ad esclusione di 192.168.1.1 che è l’indirizzo di default con cui è configurato di fabbrica l’edgerouter, ed colleghiamoci all’indirizzo 192.168.1.1 (come potrete notare già ora avremo una collisione se collegassimo l’edgerouter alla nostra lan del gestore internet) ed utilizzando la console e loggandoci con l’utenza precedentemente impostata scriviamo :
 
-	*configure*  
-	*set interfaces ethernet eth1 address 192.168.1.50/24*  
-	*commit*  
-	*save*
+```sh
+configure
+set interfaces ethernet eth1 address 192.168.1.50/24
+commit
+save
+```
 
 Ora togliamo il cavo dall’eth0 e colleghiamoci all’eth1 per proseguire con la configurazione.
 
 Ora dobbiamo configurare le subnet /24 per la eth0 e la eth2.  
 Se come subnet libere possiamo utilizzare, ad esempio la 10.150.0.0/24 e la 10.150.1.0/24 possiamo rientrare nel router e dare i seguenti comandi dalla console : 
 
-*configure*  
-	*set interfaces ethernet eth0 address 10.150.0.1/24*  
-	*set interfaces ethernet eth2 address 10.150.1.1/24*  
-	*commit*  
-	*save*
+```sh
+configure
+set interfaces ethernet eth0 address 10.150.0.1/24
+set interfaces ethernet eth2 address 10.150.1.1/24
+commit
+save
+```
 
 Volendo per entrambe le subnet possiamo impostare dei DHCP server in modo tale che qualsiasi device connesso che non abbia una configurazione ip, il router gli possa assegnare un indirizzo andiamo graficamente su Services e poi impostiamo i DHCP server che vogliamo impostare andando anche a scegliere il range di ip assegnabili.
 
 Entriamo in modalità configurazione e creiamo le vlan per i flussi di traffico
 
-*configure*  
-*set interfaces ethernet eth0 vif \#nvlan1 address 172.1x.y.z/16*  
-*set interfaces ethernet eth0 vif \#nvlan2 address 172.1x.y.z/16*  
-*commit*  
-*save*
+```sh
+configure
+set interfaces ethernet eth0 vif #nvlan1 address 172.1x.y.z/16
+set interfaces ethernet eth0 vif #nvlan2 address 172.1x.y.z/16
+commit
+save
+```
 
 Al posto di \#nvlan1/\#nvlan2 dobbiamo mettere la vlan impostata sull’antenna, quindi se abbiamo creato una vlan 4 sull’antenna 4 e la vlan arriva sulla eth0 e come indirizzo sulla 172.16.0.0/16 che ci siamo scelti è 172.16.150.4, l’impostazione da dare correttamente sarà : 
 
-	*set interfaces ethernet eth0 vif 4 address 172.16.150.4/16*
+`set interfaces ethernet eth0 vif 4 address 172.16.150.4/16`
 
 Dopo di chè dovremo installare olsrd, dai repository di debian o precompilato a parte. 
 
@@ -956,16 +966,18 @@ oppure lo si può compilare in locale.
 Per installare OLSRD da repository Debian, eseguire i seguenti comandi  
 \# per diventare root
 
-*sudo \-s \-H*
+`sudo -s -H`
 
 \# per impostare set apt sources.list (se abbiamo ad esempio un qualunque firmware con pacchetti compatibili con la distribuzione Gnu/Linux Debian Wheezy):
 
-*echo 'deb http://ftp.de.debian.org/debian/ wheezy main contrib non-free' \> /etc/apt/sources.list*
+`echo 'deb http://ftp.de.debian.org/debian/ wheezy main contrib non-free' > /etc/apt/sources.list`
 
  \# aggiorna apt ed installa il pacchetto olsrd
 
-*export DEBIAN\_FRONTEND=noninteractive*  
-*apt-get update && apt-get \-y \--force-yes install olsrd*
+```sh
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get -y --force-yes install olsrd
+```
 
 Un consiglio spassionato : **mai mai dare il comando apt-get upgrade** in quanto ci sono un certo numero di pacchetti customizzati per edgerouter che se venissero aggiornati con quelli del repository renderebbero il sistema o non utilizzabile o instabile (Fonte Ubiquiti\!).
 

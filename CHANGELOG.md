@@ -6,6 +6,7 @@ Il formato è basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 ## [Unreleased]
 
 ### Modificato
+- **Formattazione globale — comandi shell**: 31 righe con comandi in *corsivo* (`*comando*`) convertite in codice Markdown (`` `inline code` `` o fenced ` ```sh ` block); backslash escape rimossi all'interno (`\-` → `-`, `\>` → `>`, `\_` → `_`, `\#` → `#`, ecc.). Sezioni interessate: EdgeOS (5 blocchi `configure/set/commit/save/exit`), OLSRD install su Debian (`apt-get`), comandi singoli `sudo`, `echo`, `set interfaces`.
 - **EdgeOS — Plugin OLSR**: sostituito `TODO per compilazione e configurazione` con box legacy che descrive txtinfo, mdns e jsoninfo (funzione, porta, utilizzo); rimosso heading `# pfSense` mal posizionato sostituito con separatore `---`.
 - **pfSense — Routing OLSR**: corretto `status :` con comando errato (`olsrd start`) → `status: olsrd status`; corretto refuso `paccjetto` → `pacchetto`.
 - **pfSense — Considerazioni preliminari**: corretto refuso nel titolo (`premilinari` → `preliminari`) e nel testo (`Qundo` → `Quando`); aggiornato link TOC di conseguenza.
