@@ -6,6 +6,9 @@ Il formato è basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 ## [Unreleased]
 
 ### Modificato
+- **EdgeOS — Plugin OLSR**: sostituito `TODO per compilazione e configurazione` con box legacy che descrive txtinfo, mdns e jsoninfo (funzione, porta, utilizzo); rimosso heading `# pfSense` mal posizionato sostituito con separatore `---`.
+- **pfSense — Routing OLSR**: corretto `status :` con comando errato (`olsrd start`) → `status: olsrd status`; corretto refuso `paccjetto` → `pacchetto`.
+- **pfSense — Considerazioni preliminari**: corretto refuso nel titolo (`premilinari` → `preliminari`) e nel testo (`Qundo` → `Quando`); aggiornato link TOC di conseguenza.
 - **pfSense — Configurazione VLAN**: sostituito `TODO` con procedura completa per pfSense 2.7+/OPNsense (Interfaces > VLANs, parent interface, VLAN tag, nota su ID coerenti con AirOS).
 - **pfSense — Configurazione interfacce**: sostituito `TODO` con procedura per assegnare e abilitare le interfacce VLAN in pfSense/OPNsense (Interfaces > Assignments, IPv4 static, nomenclatura BSD).
 - **Troubleshooting — pfSense**: aggiunta nuova sottosezione con 5 problemi comuni: pacchetto OLSRD mancante, percorsi `/usr/pbi/` obsoleti, `rc.conf` sovrascritto, VLAN non attive senza tutti e tre i passaggi, regole firewall per porta 698.

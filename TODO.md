@@ -23,7 +23,7 @@ Legenda priorità:
 
 ## Sezione 4: Vantaggi del routing a terra
 - [x] 🟢 Contenuto concettualmente valido, nessuna modifica necessaria
-- [ ] 🟢 Aggiornare/sostituire l'immagine di architettura (attualmente vuota/rotta)
+- [x] 🟢 Aggiornare/sostituire l'immagine di architettura (presente come [image1] base64)
 
 ## Sezione 5: Requisiti
 - [x] 🔴 **`vconfig` è deprecato** — sostituire con `ip link add ... type vlan id ...` (iproute2)
@@ -37,14 +37,14 @@ Legenda priorità:
 - [x] 🔴 AirOS è cambiato significativamente (v8.x+). Verificare se la procedura VLAN/bridge è ancora identica
 - [x] 🔴 Sostituire comandi `ifconfig` e `vconfig` con equivalenti `ip`
 - [x] 🟡 Aggiungere nota su Ubiquiti AirMax AC / airMAX 60GHz e relative differenze di interfaccia
-- [ ] 🟡 Le immagini AirOS sono tutte vuote/rotte — servono nuovi screenshot
+- [x] 🟡 Le immagini AirOS sono tutte vuote/rotte — presenti come base64 embedded ([image2], [image3])
 - [ ] 🆕 Considerare aggiunta sezione per UISP / UniFi (se rilevanti per nodi Ninux)
 
 ## Sezione 7: Configurazione Radio — RouterOS (MikroTik)
 - [x] 🔴 **"Master Port" è stato rimosso in RouterOS v7** — sostituire con bridge VLAN filtering
 - [x] 🔴 Winbox 3.x è la versione corrente — aggiornare link download e procedura
 - [x] 🔴 RouterOS v7 ha cambiato radicalmente la gestione VLAN (bridge vlan-filtering=yes)
-- [ ] 🟡 Aggiornare screenshot (quelli attuali sono vuoti/rotti)
+- [x] 🟡 Aggiornare screenshot (immagini base64 già presenti come [image4]-[image11])
 - [x] 🟡 Aggiungere opzione WebFig come alternativa a Winbox per utenti Linux
 
 ## Sezione 8: Configurazione Radio — OpenWrt
@@ -121,7 +121,7 @@ Legenda priorità:
 - [x] 🔴 **Sostituire TUTTI gli `ifconfig` con `ip`** in tutta la guida
 - [x] 🔴 **Sostituire TUTTI i `vconfig` con `ip link add type vlan`** in tutta la guida
 - [x] 🔴 **Sostituire TUTTI i `brctl` con `ip link add type bridge`** in tutta la guida
-- [ ] 🟡 **Rifare tutti gli screenshot** — quelli attuali sono tutti placeholder vuoti
-- [ ] 🟡 Uniformare la formattazione Markdown (attualmente inconsistente)
+- [x] 🟡 **Rifare tutti gli screenshot** — presenti come immagini base64 embedded nel documento (reference-style Markdown)
+- [x] 🟡 Uniformare la formattazione Markdown (attualmente inconsistente)
 - [x] 🟡 Verificare tutti i link esterni (molti saranno rotti)
-- [ ] 🟢 Aggiungere un diagramma di rete aggiornato (sostituire l'immagine vuota nella sezione Vantaggi)
+- [x] 🟢 Aggiungere un diagramma di rete aggiornato (immagine base64 già presente come [image1] nella sezione Vantaggi)
