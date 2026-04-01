@@ -89,7 +89,7 @@ Legenda priorità:
 - [x] 🔴 Percorsi file (`/usr/pbi/`) non esistono più nelle versioni recenti
 - [x] 🔴 OLSRD 0.6.3 è antico — verificare disponibilità pacchetti aggiornati per pfSense attuale
 - [x] 🟡 Sezione NAT: concetti validi, aggiornare interfaccia
-- [ ] 🟡 Le sezioni "Configurazione VLAN" e "Configurazione interfacce" sono ancora `TODO`
+- [x] 🟡 Le sezioni "Configurazione VLAN" e "Configurazione interfacce" sono ancora `TODO`
 - [x] 🆕 Considerare aggiunta OPNsense come alternativa (fork attivo, più aggiornato)
 
 ## Sezione 14: Policy Routing
@@ -104,7 +104,7 @@ Legenda priorità:
 ## Sezione 16: Troubleshooting
 - [x] 🟢 Lo script cron olsrd-check è valido concettualmente
 - [x] 🟡 Per OpenWrt: `vi` → `nano` se disponibile, oppure nota sull'uso di vi
-- [ ] 🟡 Per pfSense: aggiornare percorsi e riferimenti versione
+- [x] 🟡 Per pfSense: aggiornare percorsi e riferimenti versione
 - [x] 🆕 Aggiungere troubleshooting per DSA (problemi comuni nella migrazione)
 - [x] 🆕 Aggiungere troubleshooting per RouterOS v7 bridge VLAN filtering
 
