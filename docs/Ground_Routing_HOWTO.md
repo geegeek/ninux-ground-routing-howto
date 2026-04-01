@@ -993,7 +993,23 @@ Per la configurazione di OLSRD vedere la sezione relativa alla configurazione so
 
 ### **Configurazione delle VLAN** {#configurazione-delle-vlan}
 
-TODO
+> **Nota storica (pfSense 2.1.3)**: nella versione originale della guida questa sezione era ancora da scrivere. Il contenuto seguente descrive la procedura per **pfSense 2.7+ / OPNsense**, con interfaccia web moderna.
+
+Le VLAN in pfSense/OPNsense si configurano dall'interfaccia web tramite il menu **Interfaces > VLANs** (pfSense) oppure **Interfaces > Other Types > VLAN** (OPNsense).
+
+**Procedura (pfSense 2.7+):**
+
+1. Andare su **Interfaces → VLANs** e cliccare **Add**.
+2. Nel campo **Parent Interface** selezionare l'interfaccia fisica su cui aggiungere la VLAN (es. `igb0`, `em0`).
+3. Inserire il **VLAN Tag** (es. `10` per la prima antenna, `11` per la seconda, ecc.).
+4. Inserire una descrizione opzionale (es. `VLAN_antenna1`).
+5. Salvare e ripetere per ogni VLAN necessaria.
+
+Le interfacce VLAN create appariranno nella lista con nomi del tipo `igb0.10`, `igb0.11`, ecc.
+
+**In OPNsense** la procedura è identica: **Interfaces → Other Types → VLAN**, stessa logica.
+
+> **Consiglio**: usate VLAN ID che corrispondano ai vostri indirizzi per facilitare la gestione. Ad esempio, se l'antenna usa l'IP `172.21.1.1`, potete usare VLAN ID `10` o `11` per le prime antenne. I VLAN ID devono corrispondere a quelli configurati sull'antenna (AirOS) e sull'interfaccia switch/bridge intermedia.
 
 ### **Considerazioni premilinari su interfacce e indirizzi** {#considerazioni-premilinari-su-interfacce-e-indirizzi}
 
@@ -1024,7 +1040,25 @@ Un esempio concreto:
 
 ### **Configurazione delle interfacce** {#configurazione-delle-interfacce}
 
-TODO	 	 	 	
+> **Nota storica (pfSense 2.1.3)**: anche questa sezione era `TODO` nella guida originale. Il contenuto seguente descrive la procedura per **pfSense 2.7+ / OPNsense**.
+
+Dopo aver creato le VLAN nella sezione precedente, è necessario assegnarle come interfacce attive per poterle configurare con un indirizzo IP.
+
+**Procedura (pfSense 2.7+):**
+
+1. Andare su **Interfaces → Assignments**.
+2. Nel campo **Available network ports** selezionare la prima VLAN creata (es. `igb0.10`) e cliccare **Add**.
+3. Ripetere per ogni VLAN.
+4. Cliccare su ogni interfaccia appena aggiunta (es. `OPT1`, `OPT2`, ...) per configurarla:
+   - **Enable** → spuntare "Enable interface"
+   - **Description** → dare un nome descrittivo (es. `ANT1`, `ANT2`)
+   - **IPv4 Configuration Type** → Static IPv4
+   - **IPv4 Address** → inserire l'indirizzo del nodo su questa VLAN (es. `172.21.1.1`) con il prefisso corretto (es. `/30` per link punto-punto)
+5. Salvare e applicare le modifiche.
+
+Ogni antenna corrisponderà a un'interfaccia VLAN dedicata, con il proprio indirizzo IP nella sottorete assegnata. Questo è fondamentale per permettere a OLSRD di distinguere il traffico proveniente da ciascuna antenna.
+
+**Nomenclatura interfacce in pfSense/OPNsense**: le interfacce fisiche Ethernet seguono la nomenclatura BSD (`em0`, `igb0`, `re0`, ecc.) e le VLAN vengono numerate con la notazione `parentif.vlanid` (es. `igb0.10`). Fare riferimento alla schermata di diagnostica **Interfaces → Overview** per identificare le interfacce fisiche presenti.
 
 ### **Routing: OLSR** {#routing:-olsr-1}
 
@@ -1507,6 +1541,16 @@ Dopo la migrazione da swconfig a DSA, alcuni problemi comuni sono:
 * **Perdo la connessione dopo aver abilitato vlan-filtering=yes**: questo è il problema più comune. Assicuratevi di aver configurato **tutte** le VLAN necessarie sul bridge PRIMA di abilitare il VLAN filtering. In caso di blocco, collegatevi via MAC con Winbox (funziona anche senza IP configurato) oppure resettate con il tasto fisico.
 * **Le VLAN non passano traffico**: verificate che le porte Ethernet siano effettivamente membri del bridge (Bridge > Ports) e che le VLAN siano configurate con le porte corrette (Bridge > VLANs).
 * **Winbox mostra interfacce diverse dalla v6**: è normale. In RouterOS v7, il bridge sostituisce il concetto di "Master Port". Tutte le porte sono ora "bridge ports" e le VLAN si gestiscono esclusivamente attraverso il bridge.
+
+## **Problemi comuni con pfSense / OPNsense** {#troubleshooting-pfsense}
+
+> **Nota**: questa sottosezione si riferisce a **pfSense 2.7+ / OPNsense**. Per la versione originale 2.1.3, molti percorsi di file non esistono più.
+
+* **OLSRD non è disponibile come pacchetto**: nella versione pfSense Plus / CE 2.7+, il pacchetto OLSRD non è più incluso nei repository ufficiali. Se avete bisogno di OLSRD, valutate l'uso di **OPNsense** con il plugin `os-olsrd` (se disponibile) oppure compilate OLSRD manualmente dal sorgente su FreeBSD 14.
+* **Il file `/usr/pbi/`  non esiste**: il vecchio sistema `pbi` (Package Binary Infrastructure) è stato abbandonato con pfSense 2.2. I pacchetti risiedono ora in `/usr/local/`. Ad esempio, se OLSRD fosse installato, il file di configurazione si troverebbe in `/usr/local/etc/olsrd.conf`.
+* **`rc.conf` viene sovrascritto a ogni riavvio**: anche in pfSense 2.7+ il file `/etc/rc.conf` viene gestito da pfSense stesso e le modifiche manuali vengono perse. Per avviare servizi aggiuntivi al boot usate `/etc/rc.conf.local` (su versioni recenti) oppure create un package/shellcmd tramite la GUI: **System → Advanced → Command Schedules** oppure, più correttamente, configurate il servizio tramite un pacchetto installabile.
+* **Le VLAN non passano traffico dopo la configurazione**: verificate che le VLAN siano state sia **create** (Interfaces > VLANs) sia **assegnate** (Interfaces > Assignments) sia **abilitate** (cliccare sull'interfaccia e spuntare "Enable"). Tutti e tre i passaggi sono necessari.
+* **Le regole di firewall bloccano il traffico OLSR**: pfSense applica le regole per interfaccia. Dovrete aggiungere una regola su **ciascuna** interfaccia antenna per permettere il traffico UDP sulla porta 698 (porta standard OLSR).
 
 ## **In caso di crash di OLSR** {#in-caso-di-crash-di-olsr}
 

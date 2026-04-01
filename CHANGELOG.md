@@ -6,6 +6,9 @@ Il formato è basato su [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 ## [Unreleased]
 
 ### Modificato
+- **pfSense — Configurazione VLAN**: sostituito `TODO` con procedura completa per pfSense 2.7+/OPNsense (Interfaces > VLANs, parent interface, VLAN tag, nota su ID coerenti con AirOS).
+- **pfSense — Configurazione interfacce**: sostituito `TODO` con procedura per assegnare e abilitare le interfacce VLAN in pfSense/OPNsense (Interfaces > Assignments, IPv4 static, nomenclatura BSD).
+- **Troubleshooting — pfSense**: aggiunta nuova sottosezione con 5 problemi comuni: pacchetto OLSRD mancante, percorsi `/usr/pbi/` obsoleti, `rc.conf` sovrascritto, VLAN non attive senza tutti e tre i passaggi, regole firewall per porta 698.
 - **Principi di funzionamento — Bridge**: scritto box "Approfondimento tecnico — Bridge" al posto del `[TODO]`, con spiegazione di FDB, forwarding, flooding, STP e comandi iproute2.
 - **Principi di funzionamento — VLAN**: scritto box "Approfondimento tecnico — VLAN e 802.1Q" al posto del `[TODO]`, con tabella campi header 802.1Q (TPID, PCP, DEI, VID), nota su MTU 1522 byte, e spiegazione tagged/untagged/PVID.
 - **Link esterni**: aggiornato link FreeBSD Handbook cron (vecchio URL → `docs.freebsd.org`); sostituito link morto `debian-administration.org` con riferimento a `man 5 crontab` e wiki Arch Linux.
