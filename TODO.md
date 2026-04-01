@@ -18,7 +18,7 @@ Legenda priorità:
 
 ## Sezione 3: Principi di funzionamento (Bridge + VLAN)
 - [x] 🟢 I concetti sono ancora validi — nessuna modifica strutturale necessaria
-- [ ] 🟢 Completare i `[TODO]` con box tecnici più approfonditi
+- [x] 🟢 Completare i `[TODO]` con box tecnici più approfonditi
 - [x] 🟢 Correggere "801.2Q" → "802.1Q" nella didascalia dell'immagine
 
 ## Sezione 4: Vantaggi del routing a terra
@@ -123,5 +123,5 @@ Legenda priorità:
 - [x] 🔴 **Sostituire TUTTI i `brctl` con `ip link add type bridge`** in tutta la guida
 - [ ] 🟡 **Rifare tutti gli screenshot** — quelli attuali sono tutti placeholder vuoti
 - [ ] 🟡 Uniformare la formattazione Markdown (attualmente inconsistente)
-- [ ] 🟡 Verificare tutti i link esterni (molti saranno rotti)
+- [x] 🟡 Verificare tutti i link esterni (molti saranno rotti)
 - [ ] 🟢 Aggiungere un diagramma di rete aggiornato (sostituire l'immagine vuota nella sezione Vantaggi)
